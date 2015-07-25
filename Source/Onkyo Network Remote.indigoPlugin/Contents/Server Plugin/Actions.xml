@@ -1,0 +1,362 @@
+<?xml version="1.0"?>
+<Actions>
+	<Action id="setPowerStatus" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Power Mode</Name>
+		<ConfigUI>
+			<Field type="menu" id="powerCommand">
+				<Label>Power Mode:</Label>
+				<List>
+					<Option value="00">Off</Option>
+					<Option value="01">On</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setZonePowerStatus" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Zone Power</Name>
+		<ConfigUI>
+			<Field type="menu" id="zone">
+				<Label>Zone:</Label>
+				<List method="getZoneSelectorMenu" class="self" filter="" />
+			</Field>
+			<Field type="menu" id="powerCommand">
+				<Label>Power Mode:</Label>
+				<List>
+					<Option value="00">Standby</Option>
+					<Option value="01">On</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setSleepTime" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Sleep Timer</Name>
+		<ConfigUI>
+			<Field type="textfield" id="sleepTime">
+				<Label>Sleep Timer (minutes):</Label>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="actionSeperator1" />
+	
+	<Action id="adjustVolumeLevel" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Adjust Volume Level</Name>
+		<ConfigUI>
+			<Field type="menu" id="zone">
+				<Label>Zone:</Label>
+				<List method="getZoneSelectorMenu" class="self" filter="" />
+			</Field>
+			<Field type="menu" id="adjustmentType">
+				<Label>Adjustment:</Label>
+				<List>
+					<Option value="UP1">Up 1dB</Option>
+					<Option value="UP">Up</Option>
+					<Option value="DOWN">Down</Option>
+					<Option value="DOWN1">Down 1dB</Option>
+				</List>
+			</Field>
+			<Field type="textfield" id="repeatCount" defaultValue="1">
+				<Label>Times to Send:</Label>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setVolumeLevel" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Volume Level</Name>
+		<ConfigUI>
+			<Field type="menu" id="zone">
+				<Label>Zone:</Label>
+				<List method="getZoneSelectorMenu" class="self" filter="" />
+			</Field>
+			<Field type="textfield" id="volumeLevel">
+				<Label>Volume Level:</Label>
+			</Field>
+			<Field id="volumeInstructions" type="label" fontSize="small" alignWithControl="true">
+				<Label>The volume level is an absolute value which is not necessarily a percentage of volume on all receivers, therefore the maximum volume may be less than 100 on some models.</Label>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setAudioMuting" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set/Toggle Mute</Name>
+		<ConfigUI>
+			<Field type="menu" id="zone">
+				<Label>Zone:</Label>
+				<List method="getZoneSelectorMenu" class="self" filter="" />
+			</Field>
+			<Field type="menu" id="muteCommand">
+				<Label>Mute State:</Label>
+				<List>
+					<Option value="TG">Toggle</Option>
+					<Option value="00">Off</Option>
+					<Option value="01">On</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setHDMIAudioPassthrough" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set HDMI Audio Passthrough</Name>
+		<ConfigUI>
+			<Field type="menu" id="hdmiAudioOutCmd">
+				<Label>HDMI Audio Setting:</Label>
+				<List>
+					<Option value="UP">Toggle</Option>
+					<Option value="00">Off</Option>
+					<Option value="01">On</Option>
+					<Option value="02">Auto</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setListeningMode" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Listening Mode</Name>
+		<ConfigUI>
+			<Field type="menu" id="listeningMode">
+				<Label>Audio Listening Setting:</Label>
+				<List>
+					<Option value="DOWN">Previous Mode</Option>
+					<Option value="MOVIE">Next Movie Mode</Option>
+					<Option value="MUSIC">Next Music Mode</Option>
+					<Option value="GAME">Next Game Mode</Option>
+					<Option value="UP">Next Mode</Option>
+					<Option value="00">Stereo</Option>
+					<Option value="01">Direct</Option>
+					<Option value="02">Surround</Option>
+					<Option value="03">Film, Game-RPG</Option>
+					<Option value="04">THX</Option>
+					<Option value="05">Action, Game-Action</Option>
+					<Option value="06">Musical, Game-Rock</Option>
+					<Option value="07">Mono Movie</Option>
+					<Option value="08">Orchestra</Option>
+					<Option value="09">Unplugged</Option>
+					<Option value="0A">Studio-Mix</Option>
+					<Option value="0B">TV Logic</Option>
+					<Option value="0C">All Channel Stereo</Option>
+					<Option value="0D">Theater - Dimensional</Option>
+					<Option value="0E">Enhanced 7, Game-Sports</Option>
+					<Option value="0F">Mono</Option>
+					<Option value="11">Pure Audio</Option>
+					<Option value="12">Multiplex</Option>
+					<Option value="13">Full Mono</Option>
+					<Option value="14">Dolby Virtual</Option>
+					<Option value="15">DTS Surround Sensation</Option>
+					<Option value="16">Audyssey DSX</Option>
+					<Option value="1F">Whole House Mode</Option>
+					<Option value="40">Straight Decode</Option>
+					<Option value="41">Dolby EX</Option>
+					<Option value="42">THX Cinema</Option>
+					<Option value="43">THX Surround EX</Option>
+					<Option value="44">THX Music</Option>
+					<Option value="45">THX Games</Option>
+					<Option value="50">THX U2/S2 Cinema/Cinema2</Option>
+					<Option value="51">THX MusicMode, U2/S2 Music</Option>
+					<Option value="52">THX Games Mode, U2/S2 Games</Option>
+					<Option value="80">PLII/PLIIx Movie</Option>
+					<Option value="81">PLII/PLIIx Music</Option>
+					<Option value="82">Neo6/NeoX Cinema</Option>
+					<Option value="83">Neo6/NeoX Music</Option>
+					<Option value="84">PLII/PLIIx THX Cinema</Option>
+					<Option value="85">Neo6/NeoX THX Cinema</Option>
+					<Option value="86">PLII/PLIIx Game</Option>
+					<Option value="87">Neural Surround</Option>
+					<Option value="88">Neural THX/Neural Surround</Option>
+					<Option value="89">PLII/PLIIx THX Games</Option>
+					<Option value="8A">Neo6/NeoX THX Games</Option>
+					<Option value="8B">PLII/PLIIx THX Music</Option>
+					<Option value="8C">Neo6/NeoX THX Music</Option>
+					<Option value="8D">Neural THX Cinema</Option>
+					<Option value="8E">Neural THX Music</Option>
+					<Option value="8F">Neural THX Games</Option>
+					<Option value="90">PLIIz Height</Option>
+					<Option value="91">Neo6 Cinema DTS Surround Sensation</Option>
+					<Option value="92">Neo6 Music DTS Surround Sensation</Option>
+					<Option value="93">Neural Digital Music</Option>
+					<Option value="94">PLIIz Height + THX Cinema</Option>
+					<Option value="95">PLIIz Height + THX Music</Option>
+					<Option value="96">PLIIz Height + THX Games</Option>
+					<Option value="97">PLIIz Height + THX U2/S2 Cinema</Option>
+					<Option value="98">PLIIz Height + THX U2/S2 Music</Option>
+					<Option value="99">PLIIz Height + THX U2/S2 Games</Option>
+					<Option value="9A">NeoX Game</Option>
+					<Option value="A0">PLIIx/PLII Movie + Audyssey DSX</Option>
+					<Option value="A1">PLIIx/PLII Music + Audyssey DSX</Option>
+					<Option value="A2">PLIIx/PLII Game + Audyssey DSX</Option>
+					<Option value="A3">Neo6 Cinema + Audyssey DSX</Option>
+					<Option value="A4">Neo6 Music + Audyssey DSX</Option>
+					<Option value="A5">Neural Surround + Audyssey DSX</Option>
+					<Option value="A6">Neural Digital Music + Audyssey DSX</Option>
+					<Option value="A7">Dolby EX + Audyssey DSX</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="actionSeperator2" />
+	
+	<Action id="setCurrentInput" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Current Input</Name>
+		<ConfigUI>
+			<Field type="menu" id="zone">
+				<Label>Zone:</Label>
+				<List method="getZoneSelectorMenu" class="self" filter="" />
+			</Field>
+			<Field type="menu" id="inputNumber" filter="connected">
+				<Label>Input:</Label>
+				<List method="getInputSelectorMenu" class="self" filter="connected" />
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setVideoOutResolution" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Video Out Resolution</Name>
+		<ConfigUI>
+			<Field type="menu" id="videoResolution">
+				<Label>Resolution:</Label>
+				<List>
+					<Option value="UP">Toggle</Option>
+					<Option value="00">Through</Option>
+					<Option value="01">Auto (HDMI Only)</Option>
+					<Option value="02">480p</Option>
+					<Option value="03">720p</Option>
+					<Option value="04">1080i</Option>
+					<Option value="05">1080p</Option>
+					<Option value="07">1080p/24fps</Option>
+					<Option value="08">4k Upscaling</Option>
+					<Option value="06">Source</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setVideoOutWideScreenMode" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Video Out Wide Screen Mode</Name>
+		<ConfigUI>
+			<Field type="menu" id="videoMode">
+				<Label>Wide Screen Mode:</Label>
+				<List>
+					<Option value="UP">Toggle</Option>
+					<Option value="00">Auto</Option>
+					<Option value="01">4-3</Option>
+					<Option value="02">Full</Option>
+					<Option value="03">Zoom</Option>
+					<Option value="04">Wide Zoom</Option>
+					<Option value="05">Smart Zoom</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setVideoPictureMode" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Video Out Picture Mode</Name>
+		<ConfigUI>
+			<Field type="menu" id="videoMode">
+				<Label>Video Mode:</Label>
+				<List>
+					<Option value="UP">Toggle</Option>
+					<Option value="00">Through</Option>
+					<Option value="01">Custom</Option>
+					<Option value="02">Cinema</Option>
+					<Option value="03">Game</Option>
+					<Option value="05">ISF Day</Option>
+					<Option value="06">ISF Night</Option>
+					<Option value="07">Streaming</Option>
+					<Option value="08">Direct</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="actionSeperator3" />
+	
+	<Action id="setSpeakerOnOff" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Speaker On/Off</Name>
+		<ConfigUI>
+			<Field type="menu" id="speakerSet">
+				<Label>Speakers:</Label>
+				<List>
+					<Option value="SPA">Speaker A</Option>
+					<Option value="SPB">Speaker B</Option>
+				</List>
+			</Field>
+			<Field type="menu" id="speakerCommand">
+				<Label>Mode:</Label>
+				<List>
+					<Option value="UP">Toggle</Option>
+					<Option value="00">Off</Option>
+					<Option value="01">On</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="setSpeakerTone" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Speaker Tone</Name>
+		<ConfigUI>
+			<Field type="menu" id="speakerTarget">
+				<Label>Speaker(s):</Label>
+				<List>
+					<Option value="TFR">Front</Option>
+					<Option value="TFW">Front Wide</Option>
+					<Option value="TFH">Front Hight</Option>
+					<Option value="TCT">Center</Option>
+					<Option value="TSR">Surround</Option>
+					<Option value="TSB">Surround Back</Option>
+					<Option value="TSW">Subwoofer</Option>
+				</List>
+			</Field>
+			<Field type="menu" id="toneType">
+				<Label>Frequency:</Label>
+				<List>
+					<Option value="B">Bass</Option>
+					<Option value="T">Treble</Option>
+				</List>
+			</Field>
+			<Field type="menu" id="newValue">
+				<Label>New Value:</Label>
+				<List>
+					<Option value="DOWN">Down</Option>
+					<Option value="-10">-10</Option>
+					<Option value="-8">-8</Option>
+					<Option value="-6">-6</Option>
+					<Option value="-4">-4</Option>
+					<Option value="-2">-2</Option>
+					<Option value="0">0</Option>
+					<Option value="+2">+2</Option>
+					<Option value="+4">+4</Option>
+					<Option value="+6">+6</Option>
+					<Option value="+8">+8</Option>
+					<Option value="+10">+10</Option>
+					<Option value="UP">UP</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="actionSeperatorTriggers" />
+	
+	<Action id="setAuxTriggerOnOff" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Set Auxiliary Trigger</Name>
+		<ConfigUI>
+			<Field type="menu" id="triggerId">
+				<Label>Trigger:</Label>
+				<List>
+					<Option value="TGA">A</Option>
+					<Option value="TGB">B</Option>
+					<Option value="TGC">C</Option>
+				</List>
+			</Field>
+			<Field type="menu" id="powerState">
+				<Label>Turn Trigger:</Label>
+				<List>
+					<Option value="00">Off</Option>
+					<Option value="01">On</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+</Actions>

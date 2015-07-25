@@ -1,0 +1,713 @@
+<RPFrameworkConfig>
+	<pluginConfig>
+		<guiConfiguration>
+			<pluginUpdateURL><![CDATA[http://forums.indigodomo.com/viewtopic.php?f=146&t=12325]]></pluginUpdateURL>
+		</guiConfiguration>
+		<deviceMapping>
+			<device indigoId="onkyoReceiverNetworkRemoteDevice" className="OnkyoReceiverNetworkRemoteDevice" />
+			<device indigoId="onkyoVolumeController" className="OnkyoVirtualVolumeController" />
+		</deviceMapping>
+		<devices>
+			<device indigoId="onkyoReceiverNetworkRemoteDevice">
+				<params>
+					<param indigoId="ipAddress" paramType="ParamTypeString" isRequired="True">
+						<validationExpression><![CDATA[^[a-z\d\. ]+$]]></validationExpression>
+						<invalidValueMessage><![CDATA[Please enter the IP of the television to control]]></invalidValueMessage>
+					</param>
+					<param indigoId="portNumber" paramType="ParamTypeInteger" isRequired="True">
+						<minValue>1</minValue>
+						<maxValue>99999</maxValue>
+						<defaultValue>60128</defaultValue>
+						<invalidValueMessage><![CDATA[Please enter a valid port number for the receiver to control]]></invalidValueMessage>
+					</param>
+					<param indigoId="updateInterval" paramType="ParamTypeInteger" isRequired="True">
+						<minValue>0</minValue>
+						<maxValue>99999</maxValue>
+						<invalidValueMessage><![CDATA[Please enter a valid polling time in seconds]]></invalidValueMessage>
+					</param>
+					<param indigoId="deviceZonesConnected" paramType="ParamTypeList" isRequired="True">
+						<minValue>1</minValue>
+						<maxValue>99999</maxValue>
+						<invalidValueMessage><![CDATA[Please select one or more connected zones]]></invalidValueMessage>
+					</param>
+					<param indigoId="deviceInputsConnected" paramType="ParamTypeList" isRequired="True">
+						<minValue>1</minValue>
+						<maxValue>99999</maxValue>
+						<invalidValueMessage><![CDATA[Please select one or more sources available on the receiver]]></invalidValueMessage>
+					</param>
+				</params>
+				<guiConfiguration>
+					<deviceAddressFormat><![CDATA[%ap:ipAddress%:%ap:portNumber%]]></deviceAddressFormat>
+					<telnetConnectionDeviceStateName>connectionState</telnetConnectionDeviceStateName>
+					<telnetConnectionDeviceStateBoolean>isConnected</telnetConnectionDeviceStateBoolean>
+					<commandReadTimeout>0.1</commandReadTimeout>
+					<socketConnectionTimeout>3</socketConnectionTimeout>
+					<updateStatusPollerActionId>updateReceiverStatusFull</updateStatusPollerActionId>
+					<updateStatusPollerIntervalProperty>updateInterval</updateStatusPollerIntervalProperty>
+					<childDeviceDictionaryKeyFormat><![CDATA[%dp:zoneNumber%]]></childDeviceDictionaryKeyFormat>
+					<reconnectAttemptLimit>99</reconnectAttemptLimit>
+					<reconnectAttemptDelay>30</reconnectAttemptDelay>
+				</guiConfiguration>
+				<deviceResponses>
+					<response id="devicePowerQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>isPoweredOn</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+								<updateValueExFormat><![CDATA["On" if re.match("\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on" else "Standby"]]></updateValueExFormat>
+							</effect>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK">
+								<updateParam>updateVirtualMasterVolume</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="zonePowerQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>zone2PoweredOn</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+								<updateValueExFormat><![CDATA["On" if re.match("\('power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on" else "Standby"]]></updateValueExFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="deviceSleepTimerQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('sleep\-set',\s{0,1}'(?P<value>[A-F\d]+)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>sleepTimer</updateParam>
+								<updateValueFormat><![CDATA[int(re.match("\('sleep\-set',\s{0,1}'(?P<value>[A-F\d]+)'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					
+					<response id="deviceMasterVolumeQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[^\(\('master\-volume',\s*\'volume\'\),\s*\'(?P<value>[A-F\d]+)\'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>masterVolumeLevel</updateParam>
+								<updateValueFormat><![CDATA[int(re.match("^\(\('master\-volume',\s*\'volume\'\),\s*\'(?P<value>[A-F\d]+)\'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+							</effect>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK">
+								<updateParam>updateVirtualMasterVolume</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="deviceZoneVolumeQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('volume',\s{0,1}'(?P<value>[A-F\d]+)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>zone2VolumeLevel</updateParam>
+								<updateValueFormat><![CDATA[int(re.match("^\('volume',\s{0,1}'(?P<value>[A-F\d]+)'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+							</effect>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK">
+								<updateParam>updateVirtualZone2Volume</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="deviceZoneVolumeQueryNA" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('volume',\s{0,1}'N/A'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>zone2VolumeLevel</updateParam>
+								<updateValueFormat><![CDATA[0]]></updateValueFormat>
+							</effect>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK">
+								<updateParam>updateVirtualZone2Volume</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="deviceIsMutedQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('audio\-muting',\s{0,1}'(?P<value>(on)|(off))'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>isMuted</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('audio\-muting',\s{0,1}'(?P<value>(on)|(off))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+							</effect>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK">
+								<updateParam>updateVirtualMasterVolume</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="deviceHDMIAudioOutQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('hdmi\-audio\-out',\s{0,1}'(?P<value>(on)|(off))'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>hdmiAudioOut</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('hdmi\-audio\-out',\s{0,1}'(?P<value>(on)|(off))'\)", "%cp:response%").groupdict().get("value") != "off"]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="listeningModeQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[^\('listening\-mode',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>listeningMode</updateParam>
+								<updateValueFormat><![CDATA[re.match("^\('listening\-mode',\s{0,1}(?P<value>('|\().+('|\)))\)$", "%cp:response%").groupdict().get("value").replace("'", "").replace("(", "").replace(")", "")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					
+					<response id="deviceInputSelectorQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
+								<updateParam>inputSelectorQueryReceived</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="zone2InputSelectorQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
+								<updateParam>zone2SelectorQueryReceived</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="currentVideoOutResQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[^\('monitor\-out\-resolution',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>videoOutputResolution</updateParam>
+								<updateValueFormat><![CDATA[re.match("^\('monitor\-out\-resolution',\s{0,1}(?P<value>('|\().+('|\)))\)$", "%cp:response%").groupdict().get("value").replace("'", "")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="videoWideScreenModeQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('video\-wide\-mode',\s{0,1}'(?P<value>[a-zA-Z\d\-]*)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>videoWideScreenMode</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('video\-wide\-mode',\s{0,1}'(?P<value>[a-zA-Z\d\-]*)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					
+					<response id="speakerAStatusQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('speaker\-a',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>speakerAPower</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('speaker\-a',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="speakerBStatusQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('speaker\-b',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>speakerBPower</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('speaker\-b',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+				</deviceResponses>	
+			</device>
+			<device indigoId="onkyoVolumeController">
+				<params>
+					<param indigoId="sourceReceiver" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the receiver to which this zone should be associated]]></invalidValueMessage>
+					</param>
+					<param indigoId="zoneNumber" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone whose volume you want to control]]></invalidValueMessage>
+					</param>
+					<param indigoId="maxVolume" paramType="ParamTypeInteger" isRequired="True">
+						<minValue>1</minValue>
+						<maxValue>75</maxValue>
+						<defaultValue>50</defaultValue>
+						<invalidValueMessage><![CDATA[Please enter a maximum volume level between 1 and 75]]></invalidValueMessage>
+					</param>
+				</params>
+				<guiConfiguration>
+					<deviceAddressFormat><![CDATA[Zone: %ap:zoneNumber%]]></deviceAddressFormat>
+					<deviceIsChildDevice>True</deviceIsChildDevice>
+					<deviceParentIdProperty>sourceReceiver</deviceParentIdProperty>
+				</guiConfiguration>
+			</device>
+		</devices>
+		<actions>
+			<action indigoId="updateReceiverStatusFull">
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[PWRQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[MVLQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[AMTQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[HAOQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SLIQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SPAQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SPBQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SLPQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[HDOQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[RESQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[VWMQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[VPMQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[LMDQSTN]]></commandFormat>
+					</command>
+					
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SLAQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[TUNQSTN]]></commandFormat>
+					</command>
+					
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZPWQSTN]]></commandFormat>
+						<commandExecCondition>"zone2" in %dp:deviceZonesConnected%</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SLZQSTN]]></commandFormat>
+						<commandExecCondition>"zone2" in %dp:deviceZonesConnected%</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZVLQSTN]]></commandFormat>
+						<commandExecCondition>"zone2" in %dp:deviceZonesConnected%</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setPowerStatus">
+				<params>
+					<param indigoId="powerCommand" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new power status]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[PWR%ap:powerCommand%]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[PWRQSTN]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setZonePowerStatus">
+				<params>
+					<param indigoId="zone" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone whose power is to be changed]]></invalidValueMessage>
+					</param>
+					<param indigoId="powerCommand" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new power status for the zone]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZPW%ap:powerCommand%]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setSleepTime">
+				<params>
+					<param indigoId="sleepTime" paramType="ParamTypeInteger" isRequired="True">
+						<minValue>0</minValue>
+						<maxValue>90</maxValue>
+						<invalidValueMessage><![CDATA[Please enter a new sleep time (0-90)]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[eval:eISCP.command_to_iscp('sleep-set', %ap:sleepTime%)]]></commandFormat>
+						<commandExecCondition>int("%ap:sleepTime%") > 0</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[eval:eISCP.command_to_iscp('sleep-set', 'OFF')]]></commandFormat>
+						<commandExecCondition>int("%ap:sleepTime%") == 0</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			
+			<action indigoId="adjustVolumeLevel">
+				<params>
+					<param indigoId="zone" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone whose volume is to be changed]]></invalidValueMessage>
+					</param>
+					<param indigoId="adjustmentType" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the volume adjustment to make]]></invalidValueMessage>
+					</param>
+					<param indigoId="repeatCount" paramType="ParamTypeInteger" isRequired="False">
+						<minValue>1</minValue>
+						<maxValue>20</maxValue>
+						<defaultValue>1</defaultValue>
+						<invalidValueMessage><![CDATA[Please enter a number of times to send the button (1-20 times)]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[MVL%ap:adjustmentType%]]></commandFormat>
+						<commandRepeatCount><![CDATA[%ap:repeatCount%]]></commandRepeatCount>
+						<commandRepeatDelay>0.050</commandRepeatDelay>
+						<commandExecCondition>"%ap:zone%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZVL%ap:adjustmentType%]]></commandFormat>
+						<commandRepeatCount><![CDATA[%ap:repeatCount%]]></commandRepeatCount>
+						<commandRepeatDelay>0.050</commandRepeatDelay>
+						<commandExecCondition>"%ap:zone%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setVolumeLevel">
+				<params>
+					<param indigoId="zone" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone whose volume is to be changed]]></invalidValueMessage>
+					</param>
+					<param indigoId="volumeLevel" paramType="ParamTypeInteger" isRequired="True">
+						<minValue>0</minValue>
+						<maxValue>100</maxValue>
+						<invalidValueMessage><![CDATA[Please enter a new volume (0-100)]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[eval:"MVL" + hex(%ap:volumeLevel%)[2:].upper().rjust(2,'0')]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[eval:"ZVL" + hex(%ap:volumeLevel%)[2:].upper().rjust(2,'0')]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setAudioMuting">
+				<params>
+					<param indigoId="zone" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone whose muting is to be set]]></invalidValueMessage>
+					</param>
+					<param indigoId="muteCommand" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new mute state]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[AMT%ap:muteCommand%]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZMT%ap:muteCommand%]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setHDMIAudioPassthrough">
+				<params>
+					<param indigoId="hdmiAudioOutCmd" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new HDMI passthrough status]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[HAO%ap:hdmiAudioOutCmd%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setListeningMode">
+				<params>
+					<param indigoId="listeningMode" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new listening mode]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[LMD%ap:listeningMode%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			
+			<action indigoId="setCurrentInput">
+				<params>
+					<param indigoId="zone" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone whose input is to be changed]]></invalidValueMessage>
+					</param>
+					<param indigoId="inputNumber" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the input desired]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SLI%ap:inputNumber%]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[SLZ%ap:inputNumber%]]></commandFormat>
+						<commandExecCondition>"%ap:zone%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setVideoOutResolution">
+				<params>
+					<param indigoId="videoResolution" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new output resolution]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[RES%ap:videoResolution%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setVideoOutWideScreenMode">
+				<params>
+					<param indigoId="videoMode" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new wide screen mode]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[VWM%ap:videoMode%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setVideoPictureMode">
+				<params>
+					<param indigoId="videoMode" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new picture mode]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[VPM%ap:videoMode%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			
+			<action indigoId="setSpeakerOnOff">
+				<params>
+					<param indigoId="speakerSet" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the speaker set to be changed]]></invalidValueMessage>
+					</param>
+					<param indigoId="speakerCommand" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new status]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[%ap:speakerSet%%ap:speakerCommand%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setSpeakerTone">
+				<params>
+					<param indigoId="speakerTarget" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the speaker(s) to be changed]]></invalidValueMessage>
+					</param>
+					<param indigoId="toneType" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the tone to change]]></invalidValueMessage>
+					</param>
+					<param indigoId="newValue" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new value for the tone]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[%ap:speakerTarget%%ap:toneType%%ap:newValue%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="setAuxTriggerOnOff">
+				<params>
+					<param indigoId="triggerId" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the trigger to turn on or off.]]></invalidValueMessage>
+					</param>
+					<param indigoId="powerState" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the new value for the trigger.]]></invalidValueMessage>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[%ap:triggerId%%ap:powerState%]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			
+			<!-- VIRTUAL VOLUME CONTROL ACTIONS -->
+			<action indigoId="TurnOn">
+				<!-- unmutes the zone -->
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[AMT00]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZMT00]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="TurnOff">
+				<!-- mutes the zone -->
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[AMT01]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZMT01]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="Toggle">
+				<!-- toggles the mute of the zone -->
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[AMT00]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "main" and "%dp:brightnessLevel%" == "0"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[AMT01]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "main" and "%dp:brightnessLevel%" != "0"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZMT00]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "zone2" and "%dp:brightnessLevel%" == "0"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZMT01]]></commandFormat>
+						<commandExecCondition>"%dp:zoneNumber%" == "zone2" and "%dp:brightnessLevel%" != "0"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="SetBrightness">
+				<!-- sets the zone volume -->
+				<params>
+					<param indigoId="actionValue" paramType="ParamTypeInteger" isRequired="True" />
+				</params>
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[eval:"MVL" + hex(%ap:actionValue%)[2:].upper().rjust(2,'0')]]></commandFormat>
+						<commandExecCondition><![CDATA["%dp:zoneNumber%" == "main" and %ap:actionValue% <= %dp:maxVolume%]]></commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[eval:"ZVL" + hex(%ap:actionValue%)[2:].upper().rjust(2,'0')]]></commandFormat>
+						<commandExecCondition><![CDATA["%dp:zoneNumber%" == "zone2" and %ap:actionValue% <= %dp:maxVolume%]]></commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="StatusRequest">
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[MVLQSTN]]></commandFormat>
+						<commandExecCondition>"%ap:zoneNumber%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[ZVLQSTN]]></commandFormat>
+						<commandExecCondition>"%ap:zoneNumber%" == "zone2"</commandExecCondition>
+					</command>
+				</commands>
+			</action>
+			
+			<!-- ARBITRARY COMMAND PROCESSING -->
+			<action indigoId="SendArbitraryCommand">
+				<commands>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat>%ap:commandCode%</commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="commandCode" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please enter a command to send]]></invalidValueMessage>
+					</param>
+				</params>
+			</action>
+		</actions>
+	</pluginConfig>
+</RPFrameworkConfig>
