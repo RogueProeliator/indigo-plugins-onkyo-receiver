@@ -24,7 +24,7 @@ import eISCP
 #/////////////////////////////////////////////////////////////////////////////////////////
 # Constants and configuration variables
 #/////////////////////////////////////////////////////////////////////////////////////////
-CMD_SEND_EISCP = "sendEISCPCommand"
+CMD_SEND_EISCP = u'sendEISCPCommand'
 
 
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -111,10 +111,10 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		
 		# record the new states that have been added so that the device will automatically reload the
 		# state list from the Devices.xml
-		self.upgradedDeviceStates.append("zone2PoweredOn")
-		self.upgradedDeviceStates.append("zone2InputNumber")
-		self.upgradedDeviceStates.append("zone2InputLabel")
-		self.upgradedDeviceStates.append("zone2VolumeLevel")
+		self.upgradedDeviceStates.append(u'zone2PoweredOn')
+		self.upgradedDeviceStates.append(u'zone2InputNumber')
+		self.upgradedDeviceStates.append(u'zone2InputLabel')
+		self.upgradedDeviceStates.append(u'zone2VolumeLevel')
 		
 		
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -126,9 +126,9 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def handleUnmanagedCommandInQueue(self, ipConnection, rpCommand):
 		if rpCommand.commandName == CMD_SEND_EISCP:
-			self.hostPlugin.logDebugMessage("Sending eISCP Command: " + rpCommand.commandPayload, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+			self.hostPlugin.logDebugMessage(u'Sending eISCP Command: ' + rpCommand.commandPayload, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
 			ipConnection.send(eISCP.command_to_packet(rpCommand.commandPayload))
-			self.hostPlugin.logDebugMessage("Send command completed.", RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+			self.hostPlugin.logDebugMessage(u'Send command completed.', RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should attempt to read a line of text from the connection, using the
@@ -143,10 +143,10 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			try:
 				return str(eISCP.iscp_to_command(eISCP.ISCPMessage.parse(message)))
 			except:
-				self.hostPlugin.logDebugMessage("Failed to parse eISCP message, message ignored: " + str(message), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_LOW)
+				self.hostPlugin.logDebugMessage(u'Failed to parse eISCP message, message ignored: ' + RPFramework.RPFrameworkUtils.to_unicode(message), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_LOW)
 				return message
 		else:
-			return ""
+			return u''
 			
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should attempt to read a line of text from the connection only if there
@@ -161,7 +161,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	# format of (ipAddress/HostName, portNumber)
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getDeviceAddressInfo(self):
-		return (self.indigoDevice.pluginProps.get("ipAddress", ""), int(self.indigoDevice.pluginProps.get("portNumber", "60128")))	
+		return (self.indigoDevice.pluginProps.get(u'ipAddress', u''), int(self.indigoDevice.pluginProps.get(u'portNumber', u'60128')))	
 		
 		
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -174,13 +174,13 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	def inputSelectorQueryReceived(self, responseObj, rpCommand):
 		valueSplitter = re.compile("^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
 		valueMatch = valueSplitter.search(responseObj)
-		inputValue = valueMatch.groupdict().get("value").replace("'", "")
+		inputValue = valueMatch.groupdict().get(u'value').replace("'", "")
 		inputDefinition = self.parseEISCPInputDefinition(inputValue)
 		
 		# update the two "current inputs" on the server...
-		self.indigoDevice.updateStateOnServer(key="currentInputNumber", value=inputDefinition[0])
-		self.indigoDevice.updateStateOnServer(key="currentInputLabel", value=inputDefinition[1])
-		self.hostPlugin.logDebugMessage("Updating current input number/label: " + inputDefinition[0] + " / " + inputDefinition[1], RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+		self.indigoDevice.updateStateOnServer(key=u'currentInputNumber', value=inputDefinition[0])
+		self.indigoDevice.updateStateOnServer(key=u'currentInputLabel', value=inputDefinition[1])
+		self.hostPlugin.logDebugMessage(u'Updating current input number/label: ' + inputDefinition[0] + u' / ' + inputDefinition[1], RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback is made whenever the plugin has received the response to a status
@@ -189,55 +189,55 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	def zone2SelectorQueryReceived(self, responseObj, rpCommand):
 		valueSplitter = re.compile("^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
 		valueMatch = valueSplitter.search(responseObj)
-		inputValue = valueMatch.groupdict().get("value").replace("'", "")
+		inputValue = valueMatch.groupdict().get(u'value').replace(u"'", u"")
 		inputDefinition = self.parseEISCPInputDefinition(inputValue)
 		
 		# update the two "current inputs" on the server...
-		self.indigoDevice.updateStateOnServer(key="zone2InputNumber", value=inputDefinition[0])
-		self.indigoDevice.updateStateOnServer(key="zone2InputLabel", value=inputDefinition[1])
-		self.hostPlugin.logDebugMessage("Updating zone 2 input number/label: " + inputDefinition[0] + " / " + inputDefinition[1], RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+		self.indigoDevice.updateStateOnServer(key=u'zone2InputNumber', value=inputDefinition[0])
+		self.indigoDevice.updateStateOnServer(key=u'zone2InputLabel', value=inputDefinition[1])
+		self.hostPlugin.logDebugMessage(u'Updating zone 2 input number/label: ' + inputDefinition[0] + u' / ' + inputDefinition[1], RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback will be triggered whenever an update to the Master Volume has been
 	# found; it should update any virtual controllers attached
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def updateVirtualMasterVolume(self, responseObj, rpCommand):
-		if "main" in self.childDevices:
+		if u'main' in self.childDevices:
 			# find the child device and ensure we have the latest version of the states
-			volumeController = self.childDevices["main"]
+			volumeController = self.childDevices[u'main']
 			volumeController.reloadIndigoDevice()
 			
 			# update the volume of the virtual controller if it is different than the master...
-			if volumeController.indigoDevice.states.get("brightnessLevel", 0) != self.indigoDevice.states.get("masterVolumeLevel", 0):
-				self.hostPlugin.logDebugMessage("Setting Master Volume Virtual Controller brightness to " + str(self.indigoDevice.states.get("masterVolumeLevel", 0)), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
-				volumeController.indigoDevice.updateStateOnServer(key="brightnessLevel", value=self.indigoDevice.states.get("masterVolumeLevel", 0))
+			if volumeController.indigoDevice.states.get(u'brightnessLevel', 0) != self.indigoDevice.states.get(u'masterVolumeLevel', 0):
+				self.hostPlugin.logDebugMessage(u'Setting Master Volume Virtual Controller brightness to ' + RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'masterVolumeLevel', 0)), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+				volumeController.indigoDevice.updateStateOnServer(key=u'brightnessLevel', value=self.indigoDevice.states.get(u'masterVolumeLevel', 0))
 
 			# determine the on/off state for the controller
-			isOn = self.indigoDevice.states.get("isPoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("masterVolumeLevel", 0) > 0
-			if volumeController.indigoDevice.states.get("onOffState", False) != isOn:
-				self.hostPlugin.logDebugMessage("Setting On/Off state to: " + str(isOn), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
-				volumeController.indigoDevice.updateStateOnServer(key="onOffState", value=isOn)
+			isOn = self.indigoDevice.states.get(u'isPoweredOn', False) == True and self.indigoDevice.states.get(u'isMuted', True) == False and self.indigoDevice.states.get(u'masterVolumeLevel', 0) > 0
+			if volumeController.indigoDevice.states.get(u'onOffState', False) != isOn:
+				self.hostPlugin.logDebugMessage(u'Setting On/Off state to: ' + RPFramework.RPFrameworkUtils.to_unicode(isOn), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+				volumeController.indigoDevice.updateStateOnServer(key=u'onOffState', value=isOn)
 					
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback will be triggered whenever an update to the Zone 2 Volume has been
 	# found; it should update any virtual controllers attached
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def updateVirtualZone2Volume(self, responseObj, rpCommand):
-		if "zone2" in self.childDevices:
+		if u'zone2' in self.childDevices:
 			# find the child device and ensure we have the latest version of the states
-			volumeController = self.childDevices["zone2"]
+			volumeController = self.childDevices[u'zone2']
 			volumeController.reloadIndigoDevice()
 			
 			# update the volume of the virtual controller if it is different than the master...
-			if volumeController.indigoDevice.states.get("brightnessLevel", 0) != self.indigoDevice.states.get("zone2VolumeLevel", 0):
-				self.hostPlugin.logDebugMessage("Setting Zone 2 Volume Virtual Controller brightness to " + str(self.indigoDevice.states.get("zone2VolumeLevel", 0)), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
-				volumeController.indigoDevice.updateStateOnServer(key="brightnessLevel", value=self.indigoDevice.states.get("zone2VolumeLevel", 0))
+			if volumeController.indigoDevice.states.get(u'brightnessLevel', 0) != self.indigoDevice.states.get(u'zone2VolumeLevel', 0):
+				self.hostPlugin.logDebugMessage(u'Setting Zone 2 Volume Virtual Controller brightness to ' + RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'zone2VolumeLevel', 0)), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+				volumeController.indigoDevice.updateStateOnServer(key=u'brightnessLevel', value=self.indigoDevice.states.get(u'zone2VolumeLevel', 0))
 
 			# determine the on/off state for the controller
-			isOn = self.indigoDevice.states.get("zone2PoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("zone2VolumeLevel", 0) > 0
-			if volumeController.indigoDevice.states.get("onOffState", False) != isOn:
-				self.hostPlugin.logDebugMessage("Setting On/Off state to: " + str(isOn), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
-				volumeController.indigoDevice.updateStateOnServer(key="onOffState", value=isOn)
+			isOn = self.indigoDevice.states.get(u'zone2PoweredOn', False) == True and self.indigoDevice.states.get(u'isMuted', True) == False and self.indigoDevice.states.get(u'zone2VolumeLevel', 0) > 0
+			if volumeController.indigoDevice.states.get(u'onOffState', False) != isOn:
+				self.hostPlugin.logDebugMessage(u'Setting On/Off state to: ' + RPFramework.RPFrameworkUtils.to_unicode(isOn), RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+				volumeController.indigoDevice.updateStateOnServer(key=u'onOffState', value=isOn)
 				
 	
 	#/////////////////////////////////////////////////////////////////////////////////////

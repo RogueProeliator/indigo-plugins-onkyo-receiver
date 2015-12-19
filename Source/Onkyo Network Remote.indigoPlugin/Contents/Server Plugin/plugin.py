@@ -26,6 +26,10 @@
 #		  turned off previously
 #		* Change isPoweredOn to be False for standby mode (UI Value of Standby)
 #		* Will properly set error state to Error for failed connections
+#	Version 1.7.18:
+#		* Changed master volume query's value to allow non-quoted values as seen on
+#		  certain models and reported on the forum
+#		* Full Unicode support
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +71,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
 		# RP framework base class's init method
-		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, "http://www.duncanware.com/Downloads/IndigoHomeAutomation/Plugins/OnkyoNetworkRemote/OnkyoNetworkRemoteVersionInfo.html", managedDeviceClassModule=onkyoNetworkRemoteDevice)
+		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, u'http://www.duncanware.com/Downloads/IndigoHomeAutomation/Plugins/OnkyoNetworkRemote/OnkyoNetworkRemoteVersionInfo.html', managedDeviceClassModule=onkyoNetworkRemoteDevice)
 	
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -79,45 +83,45 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getDeviceDisplayStateId(self, dev):
 		# this comes from the user's selection, stored in the device properties
-		stateId = dev.pluginProps.get("stateDisplayColumnState", "connectionState")
-		self.logDebugMessage("Returning state for State column: " + stateId, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_LOW)
+		stateId = dev.pluginProps.get(u'stateDisplayColumnState', u'connectionState')
+		self.logDebugMessage(u'Returning state for State column: ' + stateId, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_LOW)
 		return stateId
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called by the device configuration dialog in order to get the
 	# menu of available Onkyo devices
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def discoverOnkyoDevices(self, filter="", valuesDict=None, typeId="", targetId=0):
+	def discoverOnkyoDevices(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
 		foundReceivers = []
 		for receiver in eISCP.eISCP.discover(timeout=1):
-			foundReceivers.append(('%s:%s' % (receiver.host, receiver.port), '%s:%s' % (receiver.info['model_name'], receiver.host)))
+			foundReceivers.append((u'%s:%s' % (receiver.host, receiver.port), u'%s:%s' % (receiver.info['model_name'], receiver.host)))
 		return foundReceivers
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called whenever the user has clicked to use the selected onkyo
 	# from the menu of discovered devices
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def selectEnumeratedOnkyoForUse(self, valuesDict=None, filter="", typeId="", targetId=0):
-		selectedDeviceInfo = valuesDict.get("onkyoReceiversFound", "")
-		if selectedDeviceInfo != "":
+	def selectEnumeratedOnkyoForUse(self, valuesDict=None, filter=u'', typeId=u'', targetId=0):
+		selectedDeviceInfo = valuesDict.get(u'onkyoReceiversFound', u'')
+		if selectedDeviceInfo != u'':
 			addressInfo = selectedDeviceInfo.split(':')
-			valuesDict["ipAddress"] = addressInfo[0]
-			valuesDict["portNumber"] = addressInfo[1]
+			valuesDict[u'ipAddress'] = addressInfo[0]
+			valuesDict[u'portNumber'] = addressInfo[1]
 		return valuesDict
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called by the action configuration dialog to get the menu of zonesAvailable
 	# available for the device
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def getZoneSelectorMenu(self, filter="", valuesDict=None, typeId="", targetId=0):
+	def getZoneSelectorMenu(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
 		zonesAvailable = []
 		rpDevice = self.managedDevices[targetId]
-		for zone in rpDevice.indigoDevice.pluginProps.get("deviceZonesConnected"):
+		for zone in rpDevice.indigoDevice.pluginProps.get(u'deviceZonesConnected'):
 			zoneValue = zone
-			if zoneValue == "main":
-				zoneText = "Main"
+			if zoneValue == u'main':
+				zoneText = u'Main'
 			else:
-				zoneText = "Zone " + zoneValue[-1:]
+				zoneText = u'Zone ' + zoneValue[-1:]
 			zonesAvailable.append((zoneValue, zoneText))
 		return zonesAvailable
 		
@@ -125,8 +129,8 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	# This routine is called by the action configuration dialog to retrieve either the
 	# list of all inputs ("all" or None for filter) or only the connected inputs
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def getInputSelectorMenu(self, filter="", valuesDict=None, typeId="", targetId=0):
-		self.logDebugMessage("getInputSelectorMenu called for filter: {" + filter + "}", RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+	def getInputSelectorMenu(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
+		self.logDebugMessage(u'getInputSelectorMenu called for filter: {' + filter + u'}', RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
 	
 		inputsAvailable = []
 		if targetId in self.managedDevices:
@@ -134,12 +138,12 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 		else:
 			rpDevice = onkyoNetworkRemoteDevice.OnkyoReceiverNetworkRemoteDevice(self, None)
 		
-		if filter is None or filter == "" or filter == "all":
+		if filter is None or filter == u'' or filter == u'all':
 			inputsAvailable = sorted(rpDevice.inputChannelToDescription.iteritems(), key=operator.itemgetter(1))
 		else:
 			# we need to get the list of inputs matching the selected/connected list from the device
 			connectedList = []
-			for inputNum in rpDevice.indigoDevice.pluginProps.get("deviceInputsConnected"):
+			for inputNum in rpDevice.indigoDevice.pluginProps.get(u'deviceInputsConnected'):
 				connectedList.append((inputNum, rpDevice.inputChannelToDescription[inputNum]))
 			inputsAvailable = sorted(connectedList, key=operator.itemgetter(1))
 			
@@ -151,23 +155,23 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-	
 	def sendArbitraryCommand(self, valuesDict, typeId):
 		try:
-			deviceId = valuesDict.get("targetDevice", "0")
-			commandCode = valuesDict.get("commandToSend", "").strip()
+			deviceId = valuesDict.get(u'targetDevice', u'0')
+			commandCode = valuesDict.get(u'commandToSend', u'').strip()
 		
-			if deviceId == "" or deviceId == "0":
+			if deviceId == u'' or deviceId == u'0':
 				# no device was selected
 				errorDict = indigo.Dict()
-				errorDict["targetDevice"] = "Please select a device"
+				errorDict[u'targetDevice'] = u'Please select a device'
 				return (False, valuesDict, errorDict)
-			elif commandCode == "":
+			elif commandCode == u'':
 				errorDict = indigo.Dict()
-				errorDict["commandToSend"] = "Enter command to send"
+				errorDict[u'commandToSend'] = u'Enter command to send'
 				return (False, valuesDict, errorDict)
 			else:
 				# send the code using the normal action processing...
 				actionParams = indigo.Dict()
-				actionParams["commandCode"] = commandCode
-				self.executeAction(pluginAction=None, indigoActionId="SendArbitraryCommand", indigoDeviceId=int(deviceId), paramValues=actionParams)
+				actionParams[u'commandCode'] = commandCode
+				self.executeAction(pluginAction=None, indigoActionId=u'SendArbitraryCommand', indigoDeviceId=int(deviceId), paramValues=actionParams)
 				return (True, valuesDict)
 		except:
 			self.exceptionLog()

@@ -88,7 +88,7 @@
 					
 					<response id="deviceMasterVolumeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\(\('master\-volume',\s*\'volume\'\),\s*\'(?P<value>[A-F\d]+)\'\)]]></matchExpression>
+						<matchExpression><![CDATA[^\(\('master\-volume',\s*\'volume\'\),\s*\'{0,1}(?P<value>[A-F\d]+)\'{0,1}\)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>masterVolumeLevel</updateParam>
