@@ -92,7 +92,7 @@
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>masterVolumeLevel</updateParam>
-								<updateValueFormat><![CDATA[int(re.match("^\(\('master\-volume',\s*\'volume\'\),\s*\'(?P<value>[A-F\d]+)\'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+								<updateValueFormat><![CDATA[int(re.match("^\(\('master\-volume',\s*\'volume\'\),\s*\'{0,1}(?P<value>[A-F\d]+)\'{0,1}\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>updateVirtualMasterVolume</updateParam>

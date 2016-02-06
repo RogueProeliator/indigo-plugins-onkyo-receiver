@@ -30,6 +30,9 @@
 #		* Changed master volume query's value to allow non-quoted values as seen on
 #		  certain models and reported on the forum
 #		* Full Unicode support
+#	Version 1.8.19:
+#		* Updated framework, allowing use of non-standard named directories
+#		* Fixed issue with v1.7.18 master volume query processing
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
