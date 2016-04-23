@@ -74,7 +74,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
 		# RP framework base class's init method
-		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, u'http://www.duncanware.com/Downloads/IndigoHomeAutomation/Plugins/OnkyoNetworkRemote/OnkyoNetworkRemoteVersionInfo.html', managedDeviceClassModule=onkyoNetworkRemoteDevice)
+		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, managedDeviceClassModule=onkyoNetworkRemoteDevice)
 	
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
