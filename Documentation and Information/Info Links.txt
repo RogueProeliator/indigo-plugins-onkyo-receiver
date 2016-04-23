@@ -1,5 +1,0 @@
-.NET Remote
-http://www.krautsourced.com/#software/oyremote.html
-
-Python Library
-https://github.com/miracle2k/onkyo-eiscp

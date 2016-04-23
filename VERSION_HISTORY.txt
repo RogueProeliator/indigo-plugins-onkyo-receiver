@@ -1,21 +1,11 @@
-Version: 1.8.19
-EmailSubject: Onkyo Network Remote Plugin Update
-EmailBody: The Onkyo Network Remote Plugin for Indigo has been updated to version 1.8.19 and may be downloaded at http://www.duncanware.com/Downloads/IndigoHomeAutomation/Plugins/OnkyoNetworkRemote/OnkyoNetworkRemote.zip.
+Onkyo Receiver Network Remote Indigo Plugin
+https://github.com/RogueProeliator/IndigoPlugins-Onkyo-Receiver-Network-Remote
 
-This is a minor update that addresses two specific issues:
-* Fixes bug for receivers returning slightly different formatted volume returns
-* Allows installation of plugin when download has been renamed
+To update to the latest version of the application, please download the latest release available at https://github.com/RogueProeliator/IndigoPlugins-Onkyo-Receiver-Network-Remote/releases or via the Check For Updates menu option if you already have a version installed.
 
-Every effort has been made to ensure that the plugin works across Onkyo receivers, but bugs very well may exist. Please report anything you find on the forums!
-
-This email was sent to you because the update checker was enabled; only one email will be sent for this version update. If you wish to stop receiving update notifications, you may turn off the feature from the Niles Audio Receiver's configuration screen found via the Plugins menu within Indigo. If you have any problems or need assistance with the plugin, please visit the forum at http://www.perceptiveautomation.com/userforum/viewforum.php?f=146.
-
-Thanks!
-Adam (RogueProeliator)
-
-=-=-=-=-=-=-=
-Change Log
-=-=-=-=-=-=-=
+=================================
+VERSION HISTORY
+=================================
 Version 1.8.19 [2/6/2016]:
 * Fixes bug for receivers returning slightly different formatted volume returns
 * Allows installation of plugin when download has been renamed

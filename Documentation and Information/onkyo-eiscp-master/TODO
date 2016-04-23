@@ -1,3 +1,0 @@
-Some commands aren't properly supported wrt to their arguments, for example
-``zone2.tone``, which has two values that take an int, or all the things that
-have placeholders like ``nnnn``.

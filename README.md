@@ -23,15 +23,15 @@ The latest released version of the plugin is available for download [here](http:
 
 ###Configuring the Plugin
 Upon first installation you will be asked to configure the plugin; please see the instructions on the configuration screen for more information. Most users will be fine with the defaults unless an email is desired when a new version is released.
-![](<Resources/Doc-Images/OnkyoPluginConfig.png>)
+![](<Documentation/Doc-Images/OnkyoPluginConfig.png>)
 
 #Plugin Devices
 When creating (or editing a device), in the Device Settings you will need to select from the list of Onkyo devices found on the network or else manually enter your receivers's IP address. Please be sure to select the zones and inputs available on your Onkyo receiver (note that some commands only work with the main zone). These selection govern what you are able to select when creating Actions, helping to reduce the choices/menu selections.
-![](<Resources/Doc-Images/OnkyoDeviceConfig.png>)
+![](<Documentation/Doc-Images/OnkyoDeviceConfig.png>)
 
 ###Virtual Volume Controllers
 The Onkyo Virtual Volume Controller allows you to control the volume of the receiver directly from a remote device (as opposed through a control page.) This device is tied to a receiver/zone and appears in Indigo Touch, HousePad and webpages as a standard dimmer device. Create the device, select your receiver and zone (only Main is currently supported) and set a maximum volume level. Any setting above this maximum will be ignored -- this is to prevent accidentally setting the volume to a large number that could damage speakers and equipment!
-![](<Resources/Doc-Images/VirtualVolumeControllerConfig.png>)
+![](<Documentation/Doc-Images/VirtualVolumeControllerConfig.png>)
 
 #Available Device States
 The plugin tracks several devices states which are updated according to the polling frequency (set in Device Config) or upon execution of a command which will affect the state. The following states are supported:
