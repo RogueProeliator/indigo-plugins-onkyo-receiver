@@ -106,6 +106,7 @@ import threading
 import RPFrameworkUtils
 from RPFrameworkUpdater import GitHubPluginUpdater
 import ConfigParser
+import logging
 
 #/////////////////////////////////////////////////////////////////////////////////////////
 # Constants and configuration variables
@@ -225,8 +226,8 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		
 		# reduce the logging level of the requests library so it doesn't flood the Indigo Log
 		# with unnecessary information
-		#logging.getLogger("requests").setLevel(logging.WARNING)
-		#logging.getLogger("urllib3").setLevel(logging.WARNING)
+		logging.getLogger("requests").setLevel(logging.WARNING)
+		logging.getLogger("urllib3").setLevel(logging.WARNING)
 	
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -863,7 +864,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 
 				indigo.server.sendEmailTo(emailAddress, subject=emailSubject, body=versionHistory.text)
 			except:
-				indigo.server.log(u'Updater Error: Error parsing the email portion of the server''s verson file.', isError=True)
+				indigo.server.log(u'Updater Error: Error sending update notification.', isError=True)
 				if self.debug:
 					self.exceptionLog()
 				

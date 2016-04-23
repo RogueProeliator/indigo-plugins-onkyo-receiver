@@ -16,7 +16,7 @@
 				<Label>Receiver:</Label>
 				<List class="indigo.devices" filter="self.onkyoReceiverNetworkRemoteDevice" /> 
 			</Field>
-			<Field type="textfield" id="commandToSend">
+			<Field id="commandToSend" type="textfield">
 				<Label>Command:</Label>
 			</Field>
 			<Field id="exampleCommandFormat" type="label" fontSize="small" alignWithControl="true">

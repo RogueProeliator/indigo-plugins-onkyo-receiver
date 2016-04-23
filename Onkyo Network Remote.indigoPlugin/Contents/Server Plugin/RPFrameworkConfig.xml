@@ -787,11 +787,11 @@
 				<commands>
 					<command>
 						<commandName>sendEISCPCommand</commandName>
-						<commandFormat>%ap:commandCode%</commandFormat>
+						<commandFormat>%ap:commandToSend%</commandFormat>
 					</command>
 				</commands>
 				<params>
-					<param indigoId="commandCode" paramType="ParamTypeString" isRequired="True">
+					<param indigoId="commandToSend" paramType="ParamTypeString" isRequired="True">
 						<invalidValueMessage><![CDATA[Please enter a command to send]]></invalidValueMessage>
 					</param>
 				</params>

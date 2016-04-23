@@ -375,10 +375,8 @@
 	</Action>
 	
 	<Action id="actionSeparatorArbitrary" />
-	<Action id="actionSendNonDocumentedCommand">
+	<Action id="SendArbitraryCommand" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Send Arbitrary Command</Name>
-		<CallbackMethod>sendArbitraryCommand</CallbackMethod>
-		<ButtonTitle>Send</ButtonTitle>
 		<ConfigUI>
 			<Field id="sendArbitraryCommandTitle" type="label" fontColor="darkGray">
 				<Label>SEND ARBITRARY COMMAND</Label>
@@ -387,16 +385,13 @@
 			<Field type="label" id="commandSendInstructions" fontSize="small">
 				<Label>This allows sending an arbitrary command to the Onkyo receiver for use in debugging control codes or for commands not supported by the plugin.</Label>
 			</Field>
-			<Field id="targetDevice" type="menu">
-				<Label>Receiver:</Label>
-				<List class="indigo.devices" filter="self.onkyoReceiverNetworkRemoteDevice" /> 
-			</Field>
-			<Field type="textfield" id="commandToSend">
+			<Field id="commandToSend" type="textfield">
 				<Label>Command:</Label>
 			</Field>
 			<Field id="exampleCommandFormat" type="label" fontSize="small" alignWithControl="true">
 				<Label>Example Commands: PWRQSTN or RES01</Label>
 			</Field>
 		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
 </Actions>

@@ -173,7 +173,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 			else:
 				# send the code using the normal action processing...
 				actionParams = indigo.Dict()
-				actionParams[u'commandCode'] = commandCode
+				actionParams[u'commandToSend'] = commandCode
 				self.executeAction(pluginAction=None, indigoActionId=u'SendArbitraryCommand', indigoDeviceId=int(deviceId), paramValues=actionParams)
 				return (True, valuesDict)
 		except:
