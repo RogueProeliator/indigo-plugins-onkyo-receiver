@@ -140,6 +140,33 @@
 				<TriggerLabel>Zone 2 Input Label Is</TriggerLabel>
 				<ControlPageLabel>Zone 2 Input</ControlPageLabel>
 			</State>
+			
+			<State id="tunerFrequency">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Tuner Frequency</TriggerLabel>
+				<ControlPageLabel>Tuner Frequency</ControlPageLabel>
+			</State>
+			<State id="networkPlayArtist">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Streaming Artist</TriggerLabel>
+				<ControlPageLabel>Streaming Artist</ControlPageLabel>
+			</State>
+			<State id="networkPlayAlbum">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Streaming Album</TriggerLabel>
+				<ControlPageLabel>Streaming Album</ControlPageLabel>
+			</State>
+			<State id="networkPlayTitle">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Streaming Title</TriggerLabel>
+				<ControlPageLabel>Streaming Title</ControlPageLabel>
+			</State>
+			<State id="networkPlayStatus">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Streaming Status</TriggerLabel>
+				<ControlPageLabel>Streaming Status</ControlPageLabel>
+			</State>
+			
 			<State id="videoOutputResolution">
 				<ValueType>String</ValueType>
 				<TriggerLabel>Video Out Resolution</TriggerLabel>

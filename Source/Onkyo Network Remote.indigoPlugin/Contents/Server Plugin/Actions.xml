@@ -211,6 +211,20 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
+	<Action id="tuneToStation" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Tune to Station</Name>
+		<ConfigUI>
+			<Field type="label" id="tuneToStationInstructions">
+				<Label>Enter the station as a 3 to 5 digit number (numerals only) which will assume a format of FM nnn.nn MHz / AM nnnnn kHz / SR nnnnn ch</Label>
+			</Field>
+			<Field type="textfield" id="station">
+				<Label>Station:</Label>
+			</Field>
+		</ConfigUI>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="actionSeperatorInputs" />
+	
 	<Action id="setVideoOutResolution" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Video Out Resolution</Name>
 		<ConfigUI>
@@ -358,5 +372,31 @@
 			</Field>
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	
+	<Action id="actionSeparatorArbitrary" />
+	<Action id="actionSendNonDocumentedCommand">
+		<Name>Send Arbitrary Command</Name>
+		<CallbackMethod>sendArbitraryCommand</CallbackMethod>
+		<ButtonTitle>Send</ButtonTitle>
+		<ConfigUI>
+			<Field id="sendArbitraryCommandTitle" type="label" fontColor="darkGray">
+				<Label>SEND ARBITRARY COMMAND</Label>
+			</Field>
+			<Field id="titleSeparator" type="separator" />
+			<Field type="label" id="commandSendInstructions" fontSize="small">
+				<Label>This allows sending an arbitrary command to the Onkyo receiver for use in debugging control codes or for commands not supported by the plugin.</Label>
+			</Field>
+			<Field id="targetDevice" type="menu">
+				<Label>Receiver:</Label>
+				<List class="indigo.devices" filter="self.onkyoReceiverNetworkRemoteDevice" /> 
+			</Field>
+			<Field type="textfield" id="commandToSend">
+				<Label>Command:</Label>
+			</Field>
+			<Field id="exampleCommandFormat" type="label" fontSize="small" alignWithControl="true">
+				<Label>Example Commands: PWRQSTN or RES01</Label>
+			</Field>
+		</ConfigUI>
 	</Action>
 </Actions>

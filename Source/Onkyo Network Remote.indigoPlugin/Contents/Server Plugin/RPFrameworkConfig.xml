@@ -37,16 +37,17 @@
 					</param>
 				</params>
 				<guiConfiguration>
-					<deviceAddressFormat><![CDATA[%ap:ipAddress%:%ap:portNumber%]]></deviceAddressFormat>
-					<telnetConnectionDeviceStateName>connectionState</telnetConnectionDeviceStateName>
-					<telnetConnectionDeviceStateBoolean>isConnected</telnetConnectionDeviceStateBoolean>
-					<commandReadTimeout>0.1</commandReadTimeout>
-					<socketConnectionTimeout>3</socketConnectionTimeout>
-					<updateStatusPollerActionId>updateReceiverStatusFull</updateStatusPollerActionId>
-					<updateStatusPollerIntervalProperty>updateInterval</updateStatusPollerIntervalProperty>
 					<childDeviceDictionaryKeyFormat><![CDATA[%dp:zoneNumber%]]></childDeviceDictionaryKeyFormat>
+					<commandReadTimeout>0.1</commandReadTimeout>
+					<deviceAddressFormat><![CDATA[%ap:ipAddress%:%ap:portNumber%]]></deviceAddressFormat>
+					<deviceIsChildDevice>False</deviceIsChildDevice>
 					<reconnectAttemptLimit>99</reconnectAttemptLimit>
 					<reconnectAttemptDelay>30</reconnectAttemptDelay>
+					<socketConnectionTimeout>3</socketConnectionTimeout>
+					<telnetConnectionDeviceStateName>connectionState</telnetConnectionDeviceStateName>
+					<telnetConnectionDeviceStateBoolean>isConnected</telnetConnectionDeviceStateBoolean>
+					<updateStatusPollerActionId>updateReceiverStatusFull</updateStatusPollerActionId>
+					<updateStatusPollerIntervalProperty>updateInterval</updateStatusPollerIntervalProperty>
 				</guiConfiguration>
 				<deviceResponses>
 					<response id="devicePowerQuery" respondToActionId="">
@@ -183,6 +184,17 @@
 							</effect>
 						</effects>
 					</response>
+					<response id="tunerFrequencyQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('tuning',\s{0,1}'(?P<value>[\d\.]+)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>tunerFrequency</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('tuning',\s{0,1}'(?P<value>[\d\.]+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					
 					<response id="currentVideoOutResQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
 						<matchExpression><![CDATA[^\('monitor\-out\-resolution',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
@@ -221,6 +233,48 @@
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>speakerBPower</updateParam>
 								<updateValueFormat><![CDATA[re.match("\('speaker\-b',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					
+					<!-- network and streaming responses -->
+					<response id="streamingArtistQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('net\-usb\-artist\-name\-info',\s{0,1}'(?P<value>.+)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>networkPlayArtist</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('net\-usb\-artist\-name\-info',\s{0,1}'(?P<value>.+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="streamingAlbumQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('net\-usb\-album\-name\-info',\s{0,1}'(?P<value>.+)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>networkPlayAlbum</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('net\-usb\-album\-name\-info',\s{0,1}'(?P<value>.+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="streamingTitleQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('net\-usb\-title\-name',\s{0,1}'(?P<value>.+)'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>networkPlayTitle</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('net\-usb\-title\-name',\s{0,1}'(?P<value>.+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="streamingTitleStatus" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[\('net\-usb\-play\-status',\s{0,1}'(?P<value>.{3})'\)]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>networkPlayStatus</updateParam>
+								<updateValueFormat><![CDATA[re.match("\('net\-usb\-play\-status',\s{0,1}'(?P<value>.{3})'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
@@ -313,6 +367,25 @@
 						<commandFormat><![CDATA[TUNQSTN]]></commandFormat>
 					</command>
 					
+					<!-- network and streaming statuses -->
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[NATQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[NALQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[NTIQSTN]]></commandFormat>
+					</command>
+					<command>
+						<commandName>sendEISCPCommand</commandName>
+						<commandFormat><![CDATA[NSTQSTN]]></commandFormat>
+					</command>
+					
+					<!-- zone 2 commands -->
 					<command>
 						<commandName>sendEISCPCommand</commandName>
 						<commandFormat><![CDATA[ZPWQSTN]]></commandFormat>
@@ -513,6 +586,21 @@
 					</command>
 				</commands>
 			</action>
+			<action indigoId="tuneToStation">
+				<params>
+					<param indigoId="station" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please enter a station in the format XXXX or XXX.XX]]></invalidValueMessage>
+						<validationExpression><![CDATA[^[\d\.]{3,6}$]]></validationExpression>
+					</param>
+				</params>
+				<commands>
+					<command>
+						<commandName>directTune</commandName>
+						<commandFormat>%ap:station%</commandFormat>
+					</command>
+				</commands>
+			</action>
+			
 			<action indigoId="setVideoOutResolution">
 				<params>
 					<param indigoId="videoResolution" paramType="ParamTypeString" isRequired="True">

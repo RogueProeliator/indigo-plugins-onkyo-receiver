@@ -25,6 +25,7 @@ import eISCP
 # Constants and configuration variables
 #/////////////////////////////////////////////////////////////////////////////////////////
 CMD_SEND_EISCP = u'sendEISCPCommand'
+CMD_DIRECT_TUNE = u'directTune'
 
 
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -115,6 +116,11 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		self.upgradedDeviceStates.append(u'zone2InputNumber')
 		self.upgradedDeviceStates.append(u'zone2InputLabel')
 		self.upgradedDeviceStates.append(u'zone2VolumeLevel')
+		self.upgradedDeviceStates.append(u'tunerFrequency')
+		self.upgradedDeviceStates.append(u'networkPlayTitle')
+		self.upgradedDeviceStates.append(u'networkPlayAlbum')
+		self.upgradedDeviceStates.append(u'networkPlayArtist')
+		self.upgradedDeviceStates.append(u'networkPlayStatus')
 		
 		
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -129,6 +135,18 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			self.hostPlugin.logDebugMessage(u'Sending eISCP Command: ' + rpCommand.commandPayload, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
 			ipConnection.send(eISCP.command_to_packet(rpCommand.commandPayload))
 			self.hostPlugin.logDebugMessage(u'Send command completed.', RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+		elif rpCommand.commandName == CMD_DIRECT_TUNE:
+			self.hostPlugin.logDebugMessage(u'Received direct tune action to ' + rpCommand.commandPayload, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
+			if '.' in rpCommand.commandPayload:
+				# this is an FM station, pad to 2 digits to right of decimal, others to left
+				fmStationInfo = rpCommand.commandPayload.split('.')
+				tuneToStation = fmStationInfo[0].rjust(3, '0') + fmStationInfo[1].ljust(2, '0')
+			else:
+				# this is an AM or SR station, do all padding to the left
+				tuneToStation = rpCommand.commandPayload #.rjust(5, '0')
+			
+			self.hostPlugin.logDebugMessage(u'Sending tune command for ' + tuneToStation, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)				
+			ipConnection.send(eISCP.command_to_packet('TUN' + tuneToStation))
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should attempt to read a line of text from the connection, using the
