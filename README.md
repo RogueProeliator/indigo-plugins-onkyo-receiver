@@ -44,6 +44,8 @@ The plugin tracks several devices states which are updated according to the poll
 - hdmiAudioOut - this tracks whether or not the receiver will pass audio through the HDMI out to the television
 - listeningMode - this is the preset modes/equalizer states/settings that many receivers support, such as Stereo vs. Music vs. Theater
 - currentInputNumber & currentInputLabel
+- tunerFrequency
+- networkPlayArtist, networkPlayAlbum, networkPlayTitle, & networkPlayStatus - these pull the status from network streaming such as Pandora (will also pull from USB storage)
 - videoOutputResolution - the output of the video out, such as 720p or 1080p
 - videoWideScreenMode - widescreen "adjustment" mode such as zoom or stretch
 - videoPictureMode - video adjustments such as seen on many televisions
