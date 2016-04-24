@@ -217,6 +217,10 @@
 			<Field type="label" id="tuneToStationInstructions">
 				<Label>Enter the station as a 3 to 5 digit number (numerals only) which will assume a format of FM nnn.nn MHz / AM nnnnn kHz / SR nnnnn ch</Label>
 			</Field>
+			<Field type="menu" id="zone">
+				<Label>Zone:</Label>
+				<List method="getZoneSelectorMenu" class="self" filter="" />
+			</Field>
 			<Field type="textfield" id="station">
 				<Label>Station:</Label>
 			</Field>

@@ -26,6 +26,7 @@ import eISCP
 #/////////////////////////////////////////////////////////////////////////////////////////
 CMD_SEND_EISCP = u'sendEISCPCommand'
 CMD_DIRECT_TUNE = u'directTune'
+CMD_DIRECT_TUNE_ZONE2 = u'directTuneZone2'
 
 
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +136,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			self.hostPlugin.logDebugMessage(u'Sending eISCP Command: ' + rpCommand.commandPayload, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
 			ipConnection.send(eISCP.command_to_packet(rpCommand.commandPayload))
 			self.hostPlugin.logDebugMessage(u'Send command completed.', RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
-		elif rpCommand.commandName == CMD_DIRECT_TUNE:
+		elif rpCommand.commandName == CMD_DIRECT_TUNE or rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
 			self.hostPlugin.logDebugMessage(u'Received direct tune action to ' + rpCommand.commandPayload, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)
 			if '.' in rpCommand.commandPayload:
 				# this is an FM station, pad to 2 digits to right of decimal, others to left
@@ -144,9 +145,13 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			else:
 				# this is an AM or SR station, do all padding to the left
 				tuneToStation = rpCommand.commandPayload #.rjust(5, '0')
-			
+				
+			tuneCommandPrefix = "TUN"
+			if rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
+				tuneCommandPrefix = "TUZ"
+				
 			self.hostPlugin.logDebugMessage(u'Sending tune command for ' + tuneToStation, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_MED)				
-			ipConnection.send(eISCP.command_to_packet('TUN' + tuneToStation))
+			ipConnection.send(eISCP.command_to_packet(tuneCommandPrefix + tuneToStation))
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should attempt to read a line of text from the connection, using the

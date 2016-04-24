@@ -588,6 +588,9 @@
 			</action>
 			<action indigoId="tuneToStation">
 				<params>
+					<param indigoId="zone" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the zone for station tuning]]></invalidValueMessage>
+					</param>
 					<param indigoId="station" paramType="ParamTypeString" isRequired="True">
 						<invalidValueMessage><![CDATA[Please enter a station in the format XXXX or XXX.XX]]></invalidValueMessage>
 						<validationExpression><![CDATA[^[\d\.]{3,6}$]]></validationExpression>
@@ -597,6 +600,12 @@
 					<command>
 						<commandName>directTune</commandName>
 						<commandFormat>%ap:station%</commandFormat>
+						<commandExecCondition>"%ap:zone%" == "main"</commandExecCondition>
+					</command>
+					<command>
+						<commandName>directTuneZone2</commandName>
+						<commandFormat>%ap:station%</commandFormat>
+						<commandExecCondition>"%ap:zone%" == "zone2"</commandExecCondition>
 					</command>
 				</commands>
 			</action>
