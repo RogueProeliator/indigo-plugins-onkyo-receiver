@@ -10,6 +10,11 @@
 #	in the open source project on GitHub:
 #	https://github.com/miracle2k/onkyo-eiscp
 #
+#	This plugin is released under an MIT license - this is a very simple and permissive
+#	license and may be found in the LICENSE.txt file found in the root of this plugin's
+#	GitHub repository:
+#		https://github.com/RogueProeliator/IndigoPlugins-Onkyo-Receiver-Network-Remote
+#
 #	Version 0.5.9 [July 2014]:
 #		* Beta release of the plugin to Indigo users
 #	Version 1.1.12:
