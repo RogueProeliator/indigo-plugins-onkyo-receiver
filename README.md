@@ -33,23 +33,26 @@ When creating (or editing a device), in the Device Settings you will need to sel
 The Onkyo Virtual Volume Controller allows you to control the volume of the receiver directly from a remote device (as opposed through a control page.) This device is tied to a receiver/zone and appears in Indigo Touch, HousePad and webpages as a standard dimmer device. Create the device, select your receiver and zone (only Main is currently supported) and set a maximum volume level. Any setting above this maximum will be ignored -- this is to prevent accidentally setting the volume to a large number that could damage speakers and equipment!
 ![](<Documentation/Doc-Images/VirtualVolumeControllerConfig.png>)
 
+#Available Device Actions
+The list of actions available for the should be fairly self-explanatory; please post any questions or requests for additional actions in the [Indigo Domo forum](http://forums.indigodomo.com/viewforum.php?f=146) and I will do my best to help out where possible.
+
 #Available Device States
 The plugin tracks several devices states which are updated according to the polling frequency (set in Device Config) or upon execution of a command which will affect the state. The following states are supported:
 
-- isConnected & connectionState - track if Indigo has been able to successfully create/maintain a connection to the receiver
-- isPoweredOn - tracks the power state of the device, but is only applicable if Standby mode is used (a full power down will kill the connection to the device)
-- sleepTimer - specifies the number of minutes remaining on the current sleep timer, 0 if not set
-- masterVolumeLevel
-- isMuted
-- hdmiAudioOut - this tracks whether or not the receiver will pass audio through the HDMI out to the television
-- listeningMode - this is the preset modes/equalizer states/settings that many receivers support, such as Stereo vs. Music vs. Theater
-- currentInputNumber & currentInputLabel
-- tunerFrequency
-- networkPlayArtist, networkPlayAlbum, networkPlayTitle, & networkPlayStatus - these pull the status from network streaming such as Pandora (will also pull from USB storage)
-- videoOutputResolution - the output of the video out, such as 720p or 1080p
-- videoWideScreenMode - widescreen "adjustment" mode such as zoom or stretch
-- videoPictureMode - video adjustments such as seen on many televisions
-- speakerAPower/speakerBPower - power status for speaker selections on some receivers (many will read N/A for not supported)
-- zone2InputLabel & zone2InputNumber
-- zone2PoweredOn
-- zone2VolumeLevel
+- **isConnected** & **connectionState** - track if Indigo has been able to successfully create/maintain a connection to the receiver
+- **isPoweredOn** - tracks the power state of the device, but is only applicable if Standby mode is used (a full power down will kill the connection to the device)
+- **sleepTimer** - specifies the number of minutes remaining on the current sleep timer, 0 if not set
+- **masterVolumeLevel**
+- **isMuted**
+- **hdmiAudioOut** - this tracks whether or not the receiver will pass audio through the HDMI out to the television
+- **listeningMode** - this is the preset modes/equalizer states/settings that many receivers support, such as Stereo vs. Music vs. Theater
+- **currentInputNumber** & **currentInputLabel**
+- **tunerFrequency**
+- **networkPlayArtist**, **networkPlayAlbum**, **networkPlayTitle**, & **networkPlayStatus** - these pull the status from network streaming such as Pandora (will also pull from USB storage)
+- **videoOutputResolution** - the output of the video out, such as 720p or 1080p
+- **videoWideScreenMode** - widescreen "adjustment" mode such as zoom or stretch
+- **videoPictureMode** - video adjustments such as seen on many televisions
+- **speakerAPower**/**speakerBPower** - power status for speaker selections on some receivers (many will read N/A for not supported)
+- **zone2InputLabel** & **zone2InputNumber**
+- **zone2PoweredOn**
+- **zone2VolumeLevel**
