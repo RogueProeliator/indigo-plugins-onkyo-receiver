@@ -1,6 +1,8 @@
 #Introduction
 This Indigo 6.0+ plugin allows Indigo to control Onkyo receivers via their network (IP) control protocol. Onkyo's protocol is very robust and, as a result, this plugin is able to both read and set nearly every aspect of the receiver - even features that are buried very deep in the menu system. To simplify the actions and plugin, I have omitted various commands that did not seem common - such as test tones and launching the built-in surround analyzer. These types of features generally do not add to the home automation control experience, but if something is missing that you desire, please do not hesitate ask and I can add as appropriate.
 
+_**INDIGO 6 IMPORTANT NOTE:**_ The Indigo 6 version of this plugin is end-of-life with respect to new development, however the latest stable version on Indigo 6 is [still available](https://github.com/RogueProeliator/IndigoPlugins-Onkyo-Receiver-Network-Remote/releases/tag/v2.0.0) on the releases page and is working as expected at the moment. Please consider an upgrade to Indigo 7 to support further development of our favorite HA platform!
+
 #Hardware Requirements
 This plugin should work with any network-connected Onkyo receiver which supports IP control via ethernet; generally speaking the Onkyo protocol SEEMS to be pretty universal between receivers, with the caveat that not all receivers support all operations (e.g. not all have the same number of inputs, outputs, etc.). The plugin has been tested with the following hardware:
 

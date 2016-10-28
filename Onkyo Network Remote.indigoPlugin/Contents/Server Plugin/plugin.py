@@ -38,6 +38,8 @@
 #	Version 1.8.19:
 #		* Updated framework, allowing use of non-standard named directories
 #		* Fixed issue with v1.7.18 master volume query processing
+#	Version 2.1.0:
+#		* Updated API to use Indigo 7 API calls
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +94,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	def getDeviceDisplayStateId(self, dev):
 		# this comes from the user's selection, stored in the device properties
 		stateId = dev.pluginProps.get(u'stateDisplayColumnState', u'connectionState')
-		self.logDebugMessage(u'Returning state for State column: ' + stateId, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_LOW)
+		self.logger.debug(u'Returning state for State column: ' + stateId)
 		return stateId
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -138,7 +140,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	# list of all inputs ("all" or None for filter) or only the connected inputs
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getInputSelectorMenu(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
-		self.logDebugMessage(u'getInputSelectorMenu called for filter: {' + filter + u'}', RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+		self.logger.threaddebug(u'getInputSelectorMenu called for filter: {' + filter + u'}')
 	
 		inputsAvailable = []
 		if targetId in self.managedDevices:
@@ -182,6 +184,6 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 				self.executeAction(pluginAction=None, indigoActionId=u'SendArbitraryCommand', indigoDeviceId=int(deviceId), paramValues=actionParams)
 				return (True, valuesDict)
 		except:
-			self.exceptionLog()
+			self.logger.exception(u'Error sending arbitrary command: ')
 			return (False, valuesDict)	
 	
