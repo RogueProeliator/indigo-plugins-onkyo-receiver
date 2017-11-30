@@ -6,6 +6,11 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
+Version 2.1.2 [November 2017]:
+* Standardized menu text to add "..." for items generating a popup UI
+* Moved Actions to the Devices sub-menu as per Indigo recommendations
+* Reorganized for Plugin Store
+
 Version 2.1.0 [November 2016]:
 * Updated to full Indigo 7 support; Indigo 7 is now required for v2.1.0+
 

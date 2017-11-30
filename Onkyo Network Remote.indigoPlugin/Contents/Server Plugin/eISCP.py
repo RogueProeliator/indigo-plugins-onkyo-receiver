@@ -145,9 +145,17 @@ class ISCPMessage(object):
     @classmethod
     def parse(self, data):
         EOF = '\x1a'
+        TERMINATORS = ['\n', '\r']
         assert data[:2] == '!1'
-        assert data[-1] in [EOF, '\n', '\r']
-        return data[2:-3]
+        eof_offset = -1
+        
+        # EOF can be followed by CR/LF/CR+LF
+        if data[eof_offset] in TERMINATORS:
+          eof_offset -= 1
+          if data[eof_offset] in TERMINATORS:
+            eof_offset -= 1
+        assert data[eof_offset] == EOF
+        return data[2:eof_offset]
 
 
 class eISCPPacket(object):
@@ -332,7 +340,7 @@ def iscp_to_command(iscp_message):
                 return zone_cmds[command]['name'], \
                        zone_cmds[command]['values'][args]['name']
             else:
-                match = re.match('[+-]?[0-9a-f]$', args, re.IGNORECASE)
+                match = re.match('[+-]?[0-9a-f]+$', args, re.IGNORECASE)
                 if match:
                     return zone_cmds[command]['name'], \
                              int(args, 16)

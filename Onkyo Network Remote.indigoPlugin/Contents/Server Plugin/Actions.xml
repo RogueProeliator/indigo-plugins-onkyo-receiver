@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Actions>
-	<Action id="setPowerStatus" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setPowerStatus" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Power Mode</Name>
 		<ConfigUI>
 			<Field type="menu" id="powerCommand">
@@ -13,7 +13,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setZonePowerStatus" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setZonePowerStatus" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Zone Power</Name>
 		<ConfigUI>
 			<Field type="menu" id="zone">
@@ -30,7 +30,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setSleepTime" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setSleepTime" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Sleep Timer</Name>
 		<ConfigUI>
 			<Field type="textfield" id="sleepTime">
@@ -39,9 +39,9 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="actionSeperator1" />
+	<Action id="actionSeperator1" uiPath="DeviceActions" />
 	
-	<Action id="adjustVolumeLevel" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="adjustVolumeLevel" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Adjust Volume Level</Name>
 		<ConfigUI>
 			<Field type="menu" id="zone">
@@ -63,7 +63,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setVolumeLevel" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setVolumeLevel" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Volume Level</Name>
 		<ConfigUI>
 			<Field type="menu" id="zone">
@@ -79,7 +79,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setAudioMuting" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setAudioMuting" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set/Toggle Mute</Name>
 		<ConfigUI>
 			<Field type="menu" id="zone">
@@ -97,7 +97,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setHDMIAudioPassthrough" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setHDMIAudioPassthrough" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set HDMI Audio Passthrough</Name>
 		<ConfigUI>
 			<Field type="menu" id="hdmiAudioOutCmd">
@@ -112,7 +112,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setListeningMode" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setListeningMode" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Listening Mode</Name>
 		<ConfigUI>
 			<Field type="menu" id="listeningMode">
@@ -195,9 +195,9 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="actionSeperator2" />
+	<Action id="actionSeperator2" uiPath="DeviceActions" />
 	
-	<Action id="setCurrentInput" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setCurrentInput" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Current Input</Name>
 		<ConfigUI>
 			<Field type="menu" id="zone">
@@ -211,7 +211,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="tuneToStation" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="tuneToStation" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Tune to Station</Name>
 		<ConfigUI>
 			<Field type="label" id="tuneToStationInstructions">
@@ -227,9 +227,9 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="actionSeperatorInputs" />
+	<Action id="actionSeperatorInputs" uiPath="DeviceActions" />
 	
-	<Action id="setVideoOutResolution" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setVideoOutResolution" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Video Out Resolution</Name>
 		<ConfigUI>
 			<Field type="menu" id="videoResolution">
@@ -250,7 +250,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setVideoOutWideScreenMode" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setVideoOutWideScreenMode" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Video Out Wide Screen Mode</Name>
 		<ConfigUI>
 			<Field type="menu" id="videoMode">
@@ -268,7 +268,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setVideoPictureMode" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setVideoPictureMode" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Video Out Picture Mode</Name>
 		<ConfigUI>
 			<Field type="menu" id="videoMode">
@@ -288,9 +288,9 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="actionSeperator3" />
+	<Action id="actionSeperator3" uiPath="DeviceActions" />
 	
-	<Action id="setSpeakerOnOff" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setSpeakerOnOff" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Speaker On/Off</Name>
 		<ConfigUI>
 			<Field type="menu" id="speakerSet">
@@ -311,7 +311,7 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="setSpeakerTone" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setSpeakerTone" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Speaker Tone</Name>
 		<ConfigUI>
 			<Field type="menu" id="speakerTarget">
@@ -354,9 +354,9 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="actionSeperatorTriggers" />
+	<Action id="actionSeperatorTriggers" uiPath="DeviceActions" />
 	
-	<Action id="setAuxTriggerOnOff" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="setAuxTriggerOnOff" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Auxiliary Trigger</Name>
 		<ConfigUI>
 			<Field type="menu" id="triggerId">
@@ -378,8 +378,8 @@
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
 	
-	<Action id="actionSeparatorArbitrary" />
-	<Action id="SendArbitraryCommand" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+	<Action id="actionSeparatorArbitrary" uiPath="DeviceActions" />
+	<Action id="SendArbitraryCommand" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Send Arbitrary Command</Name>
 		<ConfigUI>
 			<Field id="sendArbitraryCommandTitle" type="label" fontColor="darkGray">

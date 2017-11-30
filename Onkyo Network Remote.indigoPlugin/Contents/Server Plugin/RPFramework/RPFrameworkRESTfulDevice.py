@@ -46,6 +46,9 @@
 #		Added requests' response object to the restful error call
 #		Changed error logging to the new plugin-based logErrorMessage routine
 #		Implemented POST operation via Requests
+#	[January 2017]:
+#		Added response body to default error handler (debug level)
+#		Added threaddebug level logging of headers to the SOAP request
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +73,7 @@ import urllib2
 from urlparse import urlparse
 
 import requests
+from requests.auth import HTTPDigestAuth
 import RPFrameworkPlugin
 import RPFrameworkCommand
 import RPFrameworkDevice
@@ -241,7 +245,11 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 								password = commandPayloadList[4]
 							if authenticationType != 'none' and username != u'':
 								self.hostPlugin.logger.threaddebug(u'Using login credentials... Username=> ' + username + u'; Password=>' + RPFrameworkUtils.to_unicode(len(password)) + u' characters long')
-								authenticationParam = (username, password)
+								if authenticationType.lower() == 'digest':
+									self.hostPlugin.logger.threaddebug(u'Enabling digest authentication')
+									authenticationParam = HTTPDigestAuth(username, password)
+								else:
+									authenticationParam = (username, password)
 							
 							# execute the URL fetching depending upon the method requested
 							if command.commandName == CMD_RESTFUL_GET or command.commandName == CMD_DOWNLOADFILE or command.commandName == CMD_DOWNLOADIMAGE:
@@ -293,6 +301,10 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 														self.hostPlugin.logger.debug(saveLocation + u' resized via sip shell command')
 													except:
 														self.hostPlugin.logger.error(u'Error resizing image via sips')
+														
+											# we have completed the download and processing successfully... allow the
+											# device (or its descendants) to process successful operations
+											self.notifySuccessfulDownload(command, saveLocation)
 										finally:
 											if not localFile is None:
 												localFile.close()					
@@ -312,7 +324,9 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 								self.handleRESTfulError(command, str(responseObj.status_code), responseObj)
 							 	
 						except Exception, e:
-							self.handleRESTfulError(command, e, responseObj)
+							# the response value really should not be defined here as it bailed without
+							# catching any of our response error conditions
+							self.handleRESTfulError(command, e, None)
 						
 					elif command.commandName == CMD_SOAP_REQUEST or command.commandName == CMD_JSON_REQUEST:
 						responseObj = None
@@ -337,7 +351,8 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 								customHeaders["Content-type"] = "application/json"
 							
 							# execute the URL post to the web service
-							self.hostPlugin.logger.threaddebug(u'Sending SOAP/JSON request:\n' + RPFrameworkUtils.to_str(soapBody))
+							self.hostPlugin.logger.threaddebug(u'Sending SOAP/JSON request:\n' + RPFrameworkUtils.to_unicode(soapBody))
+							self.hostPlugin.logger.threaddebug(u'Using headers: \n' + RPFrameworkUtils.to_unicode(customHeaders))
 							responseObj = requests.post(fullGetUrl, headers=customHeaders, verify=False, data=RPFrameworkUtils.to_str(soapBody))
 							
 							if responseObj.status_code == 200:
@@ -348,6 +363,7 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 								self.hostPlugin.logger.threaddebug(command.commandName + u' command response processing completed')
 								
 							else:
+								self.hostPlugin.logger.threaddebug(u'Command Response was not HTTP OK, handling RESTful error')
 								self.handleRESTfulError(command, str(responseObj.status_code), responseObj)
 
 						except Exception, e:
@@ -388,9 +404,9 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 		except SystemExit:
 			pass
 		except Exception:
-			self.hostPlugin.exceptionLog()
+			self.hostPlugin.logger.exception(u'Exception in background processing')
 		except:
-			self.hostPlugin.exceptionLog()
+			self.hostPlugin.logger.exception(u'Exception in background processing')
 		finally:
 			self.hostPlugin.logger.debug(u'Command thread ending processing')
 			self.hostPlugin.closeDatabaseConnection(self.dbConn)
@@ -436,7 +452,17 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-		
 	def handleRESTfulError(self, rpCommand, err, response=None):
 		if rpCommand.commandName == CMD_RESTFUL_PUT or rpCommand.commandName == CMD_RESTFUL_GET:
-			self.hostPlugin.logger.error(u'An error occurred executing the GET/PUT request (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
+			self.hostPlugin.logger.exception(u'An error occurred executing the GET/PUT request (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
 		else:
-			self.hostPlugin.logger.error(u'An error occurred processing the SOAP/JSON POST request: (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))		
+			self.hostPlugin.logger.exception(u'An error occurred processing the SOAP/JSON POST request: (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
+			
+		if not response is None and not response.text is None:
+			self.hostPlugin.logger.debug(RPFrameworkUtils.to_unicode(response.text))
+			
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine will handle notification to the device whenever a file was successfully
+	# downloaded via a DOWNLOAD_FILE or DOWNLOAD_IMAGE command
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def notifySuccessfulDownload(self, rpCommand, outputFileName):
+		pass
 	
