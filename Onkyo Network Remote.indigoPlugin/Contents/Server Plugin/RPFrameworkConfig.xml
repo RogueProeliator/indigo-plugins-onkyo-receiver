@@ -166,7 +166,7 @@
 					
 					<response id="deviceInputSelectorQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<matchExpression><![CDATA[^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
 								<updateParam>inputSelectorQueryReceived</updateParam>

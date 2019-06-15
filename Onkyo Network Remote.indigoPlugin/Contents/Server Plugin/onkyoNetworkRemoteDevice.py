@@ -62,6 +62,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			"08" : "08",
 			"09" : "09",
 			"(dvd, bd, dvd)" : "10",
+			"18" : "12",
 			"(tape-1, tv, tape)" : "20",
 			"tape2" : "21",
 			"phono" : "22",
@@ -92,6 +93,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			"08" : "Hidden2",
 			"09" : "Hidden3",
 			"10" : "DVD, BD/DVD",
+			"12" : "TV",
 			"20" : "TAPE(1), TV/TAPE",
 			"21" : "TAPE2",
 			"22" : "PHONO",
@@ -144,7 +146,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 				tuneToStation = fmStationInfo[0].rjust(3, '0') + fmStationInfo[1].ljust(2, '0')
 			else:
 				# this is an AM or SR station, do all padding to the left
-				tuneToStation = rpCommand.commandPayload #.rjust(5, '0')
+				tuneToStation = rpCommand.commandPayload.rjust(5, '0')
 				
 			tuneCommandPrefix = "TUN"
 			if rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
@@ -195,7 +197,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	# request for the current input for the receiver
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def inputSelectorQueryReceived(self, responseObj, rpCommand):
-		valueSplitter = re.compile("^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
+		valueSplitter = re.compile("^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$")
 		valueMatch = valueSplitter.search(responseObj)
 		inputValue = valueMatch.groupdict().get(u'value').replace("'", "")
 		inputDefinition = self.parseEISCPInputDefinition(inputValue)

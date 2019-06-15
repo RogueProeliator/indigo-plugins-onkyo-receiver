@@ -49,6 +49,8 @@
 #	[January 2017]:
 #		Added response body to default error handler (debug level)
 #		Added threaddebug level logging of headers to the SOAP request
+#	February 2019:
+#		Removed obsolete database connection support
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -146,9 +148,6 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 			updateStatusPollerActionId = self.hostPlugin.getGUIConfigValue(self.indigoDevice.deviceTypeId, GUI_CONFIG_RESTFULSTATUSPOLL_ACTIONID, u'')
 			emptyQueueReducedWaitCycles = int(self.hostPlugin.getGUIConfigValue(self.indigoDevice.deviceTypeId, GUI_CONFIG_RESTFULDEV_EMPTYQUEUE_SPEEDUPCYCLES, u'80'))
 			
-			# spin up the database connection, if this plugin supports databases
-			self.dbConn = self.hostPlugin.openDatabaseConnection(self.indigoDevice.deviceTypeId)
-			
 			# begin the infinite loop which will run as long as the queue contains commands
 			# and we have not received an explicit shutdown request
 			continueProcessingCommands = True
@@ -229,6 +228,7 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 							# [5] => data to post as the body (if any, may be blank)
 							commandPayloadList = command.getPayloadAsList()
 							fullGetUrl = commandPayloadList[0] + u'://' + deviceHTTPAddress[0] + u':' + RPFrameworkUtils.to_unicode(deviceHTTPAddress[1]) + commandPayloadList[1]
+							self.hostPlugin.logger.threaddebug(u'Full URL for GET: ' + fullGetUrl)
 							
 							customHeaders = {}
 							self.addCustomHTTPHeaders(customHeaders)
@@ -409,7 +409,6 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 			self.hostPlugin.logger.exception(u'Exception in background processing')
 		finally:
 			self.hostPlugin.logger.debug(u'Command thread ending processing')
-			self.hostPlugin.closeDatabaseConnection(self.dbConn)
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should return the HTTP address that will be used to connect to the

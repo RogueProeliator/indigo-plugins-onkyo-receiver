@@ -147,9 +147,9 @@ class ISCPMessage(object):
         EOF = '\x1a'
         TERMINATORS = ['\n', '\r']
         assert data[:2] == '!1'
-        eof_offset = -1
-        
+                
         # EOF can be followed by CR/LF/CR+LF
+        eof_offset = -1
         if data[eof_offset] in TERMINATORS:
           eof_offset -= 1
           if data[eof_offset] in TERMINATORS:
@@ -340,7 +340,7 @@ def iscp_to_command(iscp_message):
                 return zone_cmds[command]['name'], \
                        zone_cmds[command]['values'][args]['name']
             else:
-                match = re.match('[+-]?[0-9a-f]+$', args, re.IGNORECASE)
+                match = re.match('[+-]?[0-9a-f]$', args, re.IGNORECASE)
                 if match:
                     return zone_cmds[command]['name'], \
                              int(args, 16)

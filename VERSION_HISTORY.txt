@@ -6,6 +6,12 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
+Version 2.1.3 [March 2018]:
+* Fixed tuning issue with direct tune to AM stations
+* Fixed issue reading the currently tuned radio station
+* Added property on receivers to adjust the volume display - receivers may send base 10 or base 16 numerical values
+* Added input source of 18 as reported as a valid input in the forum
+
 Version 2.1.2 [November 2017]:
 * Standardized menu text to add "..." for items generating a popup UI
 * Moved Actions to the Devices sub-menu as per Indigo recommendations
