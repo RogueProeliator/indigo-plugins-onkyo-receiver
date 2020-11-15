@@ -51,35 +51,36 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		
 		# create the dictionary that maps input selector values to/from their respective numbers
 		self.inputSelectorEISCPMappings = {
-			"(video1, vcr, dvr)" : "00",
-			"(video2, cbl, sat)" : "01",
-			"(video3, game, tv, game)" : "02",
-			"(video4, aux1)" : "03",
-			"(video5, aux2)" : "04",
-			"(video6, pc)" : "05",
-			"video7" : "06",
-			"07" : "07",
-			"08" : "08",
-			"09" : "09",
-			"(dvd, bd, dvd)" : "10",
-			"18" : "12",
-			"(tape-1, tv, tape)" : "20",
-			"tape2" : "21",
-			"phono" : "22",
-			"(cd, tv, cd)" : "23",
-			"fm" : "24",
-			"am" : "25",
-			"tuner" : "26",
+			"(video1, vcr, dvr)"        : "00",
+			"(video2, cbl, sat)"        : "01",
+			"(video3, game, tv, game)"  : "02",
+			"(video4, aux1)"            : "03",
+			"(video5, aux2)"            : "04",
+			"(video6, pc)"              : "05",
+			"video7"                    : "06",
+			"07"                        : "07",
+			"08"                        : "08",
+			"09"                        : "09",
+			"(dvd, bd, dvd)"            : "10",
+			"11"                        : "11",
+			"18"                        : "12",
+			"(tape-1, tv, tape)"        : "20",
+			"tape2"                     : "21",
+			"phono"                     : "22",
+			"(cd, tv, cd)"              : "23",
+			"fm"                        : "24",
+			"am"                        : "25",
+			"tuner"                     : "26",
 			"(music-server, p4s, dlna)" : "27",
 			"(internet-radio, iradio-favorite)" : "28",
-			"(usb, usb)" : "29",
-			"usb" : "2A",
-			"(network, net)" : "2B",
-			"usb" : "2C",
-			"multi-ch" : "30",
-			"xm" : "31",
-			"sirius" : "32",
-			"universal-port" : "40" }
+			"(usb, usb)"                : "29",
+			"usb"                       : "2A",
+			"(network, net)"            : "2B",
+			"usb"                       : "2C",
+			"multi-ch"                  : "30",
+			"xm"                        : "31",
+			"sirius"                    : "32",
+			"universal-port"            : "40" }
 		
 		self.inputChannelToDescription = {
 			"00" : "VIDEO1, VCR/DVR",
@@ -93,6 +94,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			"08" : "Hidden2",
 			"09" : "Hidden3",
 			"10" : "DVD, BD/DVD",
+			"11" : "STRMBOX",
 			"12" : "TV",
 			"20" : "TAPE(1), TV/TAPE",
 			"21" : "TAPE2",
@@ -110,8 +112,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			"30" : "MULTI CH",
 			"31" : "XM",
 			"32" : "SIRIUS",
-			"40" : "Universal PORT"
-		}
+			"40" : "Universal PORT" }
 		
 		# record the new states that have been added so that the device will automatically reload the
 		# state list from the Devices.xml
