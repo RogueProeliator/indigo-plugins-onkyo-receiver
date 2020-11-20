@@ -9,6 +9,7 @@ VERSION HISTORY
 Version 2.1.4 [November 2020]
 * Updated to Indigo 7.3+ standards
 * Unified plugin UI across all RogueProeliator plugins
+* Added support for STRMBOX input
 * Now requires Indigo 7.3+ (old versions will remain available for previous versions)
 
 Version 2.1.3 [March 2018]:
