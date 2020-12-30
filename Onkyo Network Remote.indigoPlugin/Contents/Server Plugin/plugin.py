@@ -15,32 +15,6 @@
 #	GitHub repository:
 #		https://github.com/RogueProeliator/IndigoPlugins-Onkyo-Receiver-Network-Remote
 #
-#	Version 0.5.9 [July 2014]:
-#		* Beta release of the plugin to Indigo users
-#	Version 1.1.12:
-#		* Added virtual volume controller (dimmer) device
-#		* Added ability to choose the State display column
-#	Version 1.3.14:
-#		* Added Zone 2 power commands
-#	Version 1.4.15:
-#		* Added Zone 2 input selection and state retrieval
-#	Version 1.5.15:
-#		* Added Zone 2 volume control
-#	Version 1.6.16:
-#		* Added ability to reconnect when the connection fails (this was accidentally
-#		  turned off previously
-#		* Change isPoweredOn to be False for standby mode (UI Value of Standby)
-#		* Will properly set error state to Error for failed connections
-#	Version 1.7.18:
-#		* Changed master volume query's value to allow non-quoted values as seen on
-#		  certain models and reported on the forum
-#		* Full Unicode support
-#	Version 1.8.19:
-#		* Updated framework, allowing use of non-standard named directories
-#		* Fixed issue with v1.7.18 master volume query processing
-#	Version 2.1.0:
-#		* Updated API to use Indigo 7 API calls
-#
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
 

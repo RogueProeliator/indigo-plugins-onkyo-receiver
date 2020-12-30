@@ -39,8 +39,8 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
+
 	<Action id="actionSeperator1" uiPath="DeviceActions" />
-	
 	<Action id="adjustVolumeLevel" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Adjust Volume Level</Name>
 		<ConfigUI>
@@ -195,8 +195,8 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
+
 	<Action id="actionSeperator2" uiPath="DeviceActions" />
-	
 	<Action id="setCurrentInput" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Current Input</Name>
 		<ConfigUI>
@@ -214,7 +214,7 @@
 	<Action id="tuneToStation" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Tune to Station</Name>
 		<ConfigUI>
-			<Field type="label" id="tuneToStationInstructions">
+			<Field type="label" id="tuneToStationInstructions" fontSize="small">
 				<Label>Enter the station as a 3 to 5 digit number (numerals only) which will assume a format of FM nnn.nn MHz / AM nnnnn kHz / SR nnnnn ch</Label>
 			</Field>
 			<Field type="menu" id="zone">
@@ -227,8 +227,8 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
+
 	<Action id="actionSeperatorInputs" uiPath="DeviceActions" />
-	
 	<Action id="setVideoOutResolution" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Video Out Resolution</Name>
 		<ConfigUI>
@@ -288,8 +288,8 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
+
 	<Action id="actionSeperator3" uiPath="DeviceActions" />
-	
 	<Action id="setSpeakerOnOff" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Speaker On/Off</Name>
 		<ConfigUI>
@@ -354,8 +354,8 @@
 		</ConfigUI>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
+
 	<Action id="actionSeperatorTriggers" uiPath="DeviceActions" />
-	
 	<Action id="setAuxTriggerOnOff" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Auxiliary Trigger</Name>
 		<ConfigUI>

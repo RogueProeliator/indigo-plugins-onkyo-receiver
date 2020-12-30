@@ -20,18 +20,23 @@
 			</Field>
 		</ConfigUI>
 	</MenuItem>
+
 	<MenuItem id="deviceCmdsSeparator" type="separator" />
 	<MenuItem id="toggleDebug">
 		<Name>Toggle Debugging On/Off</Name>
 		<CallbackMethod>toggleDebugEnabled</CallbackMethod>
 	</MenuItem>
 	<MenuItem id="debugDumpDeviceDetails">
-		<Name>Log Device Details...</Name>
+		<Name>Log Device Details</Name>
 		<CallbackMethod>dumpDeviceDetailsToLog</CallbackMethod>
 		<ButtonTitle>Output</ButtonTitle>
 		<ConfigUI>
+			<Field id="dumpDeviceDetailsToLog_Title" type="label" fontColor="darkGray">
+				<Label>DEVICE DETAILS DEBUG</Label>
+			</Field>
+			<Field id="dumpDeviceDetailsToLog_TitleSeparator" type="separator" />
 			<Field type="label" id="dumpDeviceDetailsToLogInstructions" fontSize="small">
-				<Label>Outputs the details of a plugin device to the Indigo Event Log to aid in debugging and forum posts.</Label>
+				<Label>This function will dump the details of a plugin device to the Indigo Event Log to aid in debugging and forum posts.</Label>
 			</Field>
 			<Field id="devicesToDump" type="list">
 				<Label>Devices to Log:</Label>
@@ -39,6 +44,7 @@
 			</Field>
 		</ConfigUI>
 	</MenuItem>
+
 	<MenuItem id="updateSectionSeparator" />
 	<MenuItem id="viewLicense">
 		<Name>View License...</Name>

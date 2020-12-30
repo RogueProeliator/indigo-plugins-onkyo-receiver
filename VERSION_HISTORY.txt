@@ -6,7 +6,10 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
-Version 2.1.4 [November 2020]
+Version 2.1.5 [January 2021]:
+* Minor UI consistency/clarity enhancements to Actions
+
+Version 2.1.4 [November 2020]:
 * Updated to Indigo 7.3+ standards
 * Unified plugin UI across all RogueProeliator plugins
 * Now requires Indigo 7.3+ (old versions will remain available for previous versions)

@@ -5,7 +5,7 @@
 	<Device type="custom" id="onkyoReceiverNetworkRemoteDevice">
 		<Name>Onkyo Receiver</Name>
 		<ConfigUI>	
-			<Field id="commOptionsTitle" type="label" fontColor="darkGray" fontSize="small">
+			<Field id="commOptionsTitle" type="label" fontColor="darkGray">
 				<Label>COMMUNICATION OPTIONS</Label>
 			</Field>
 			<Field id="instructionSeparator2" type="separator" />
@@ -34,7 +34,7 @@
 				<Label>This interval, specified in seconds, determines how often the plugin attempts to read the status of all states of the receiver; this is used to update the plugin whenever a manual change has occurred (such as a change by the physical remote remote or buttons). Setting to 0 will disable status update polling.</Label>
 			</Field>
 			
-			<Field id="devConfigTitle" type="label" fontColor="darkGray" fontSize="small">
+			<Field id="devConfigTitle" type="label" fontColor="darkGray">
 				<Label>DEVICE CONNECTIONS CONFIGURATION</Label>
 			</Field>
 			<Field id="devConnSeparator" type="separator" />
@@ -50,7 +50,7 @@
 				<List method="getInputSelectorMenu" class="self" filter="all" />
 			</Field>
 			
-			<Field id="devDisplayConfigTitle" type="label" fontColor="darkGray" fontSize="small">
+			<Field id="devDisplayConfigTitle" type="label" fontColor="darkGray">
 				<Label>INDIGO DISPLAY OPTIONS</Label>
 			</Field>
 			<Field id="devDisplayConfigSeparator" type="separator" />

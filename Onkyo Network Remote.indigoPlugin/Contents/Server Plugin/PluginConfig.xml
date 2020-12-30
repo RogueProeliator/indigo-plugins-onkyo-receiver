@@ -6,7 +6,15 @@
     <Field id="pluginAuthorLabel" type="label" fontSize="small">
         <Label>Developed by RogueProeliator</Label>
     </Field>    
-    <Field id="pluginDescriptionLabel" type="label">
+
+	<Field type="label" id="aboutSpacer" fontSize="small">
+		<Label></Label>
+	</Field>
+	<Field id="aboutTitle" type="label" fontColor="darkGray">
+		<Label>ABOUT</Label>
+	</Field>
+	<Field id="aboutSeparator" type="separator" />
+    <Field id="pluginDescriptionLabel" type="label" fontSize="small">
 		<Label>This Indigo plugin allows Indigo to act as a remote display and/or control for a network-connected Onkyo Receiver.</Label>
 	</Field>
 	

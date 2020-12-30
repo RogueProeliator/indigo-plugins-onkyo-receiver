@@ -164,8 +164,8 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		eISCPData = select.select([connection], [], [], commandResponseTimeout)
 		if eISCPData[0]:
 			header_bytes = connection.recv(16)
-			header = eISCP.eISCPPacket.parse_header(header_bytes)
-			message = connection.recv(header.data_size)
+			header       = eISCP.eISCPPacket.parse_header(header_bytes)
+			message      = connection.recv(header.data_size)
 			try:
 				return str(eISCP.iscp_to_command(eISCP.ISCPMessage.parse(message)))
 			except:
@@ -198,9 +198,9 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	# request for the current input for the receiver
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def inputSelectorQueryReceived(self, responseObj, rpCommand):
-		valueSplitter = re.compile("^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$")
-		valueMatch = valueSplitter.search(responseObj)
-		inputValue = valueMatch.groupdict().get(u'value').replace("'", "")
+		valueSplitter   = re.compile(r"^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$")
+		valueMatch      = valueSplitter.search(responseObj)
+		inputValue      = valueMatch.groupdict().get(u'value').replace("'", "")
 		inputDefinition = self.parseEISCPInputDefinition(inputValue)
 		
 		# update the two "current inputs" on the server...
@@ -213,9 +213,9 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	# request for the current input for Zone 2 of the receiver
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def zone2SelectorQueryReceived(self, responseObj, rpCommand):
-		valueSplitter = re.compile("^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
-		valueMatch = valueSplitter.search(responseObj)
-		inputValue = valueMatch.groupdict().get(u'value').replace(u"'", u"")
+		valueSplitter   = re.compile(r"^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
+		valueMatch      = valueSplitter.search(responseObj)
+		inputValue      = valueMatch.groupdict().get(u'value').replace(u"'", u"")
 		inputDefinition = self.parseEISCPInputDefinition(inputValue)
 		
 		# update the two "current inputs" on the server...
