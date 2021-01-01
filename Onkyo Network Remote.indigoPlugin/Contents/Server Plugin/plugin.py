@@ -68,7 +68,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	def getDeviceDisplayStateId(self, dev):
 		# this comes from the user's selection, stored in the device properties
 		stateId = dev.pluginProps.get(u'stateDisplayColumnState', u'connectionState')
-		self.logger.debug(u'Returning state for State column: ' + stateId)
+		self.logger.debug(u'Returning state for State column: {0}'.format(stateId))
 		return stateId
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -89,7 +89,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 		selectedDeviceInfo = valuesDict.get(u'onkyoReceiversFound', u'')
 		if selectedDeviceInfo != u'':
 			addressInfo = selectedDeviceInfo.split(':')
-			valuesDict[u'ipAddress'] = addressInfo[0]
+			valuesDict[u'ipAddress']  = addressInfo[0]
 			valuesDict[u'portNumber'] = addressInfo[1]
 		return valuesDict
 	
@@ -105,7 +105,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 			if zoneValue == u'main':
 				zoneText = u'Main'
 			else:
-				zoneText = u'Zone ' + zoneValue[-1:]
+				zoneText = u'Zone {0}'.format(zoneValue[-1:])
 			zonesAvailable.append((zoneValue, zoneText))
 		return zonesAvailable
 		
@@ -114,7 +114,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	# list of all inputs ("all" or None for filter) or only the connected inputs
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getInputSelectorMenu(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
-		self.logger.threaddebug(u'getInputSelectorMenu called for filter: {' + filter + u'}')
+		self.logger.threaddebug(u'getInputSelectorMenu called for filter: {0}'.format(filter))
 	
 		inputsAvailable = []
 		if targetId in self.managedDevices:

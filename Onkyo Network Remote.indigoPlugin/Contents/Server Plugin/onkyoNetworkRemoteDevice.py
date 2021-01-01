@@ -24,8 +24,8 @@ import eISCP
 #/////////////////////////////////////////////////////////////////////////////////////////
 # Constants and configuration variables
 #/////////////////////////////////////////////////////////////////////////////////////////
-CMD_SEND_EISCP = u'sendEISCPCommand'
-CMD_DIRECT_TUNE = u'directTune'
+CMD_SEND_EISCP        = u'sendEISCPCommand'
+CMD_DIRECT_TUNE       = u'directTune'
 CMD_DIRECT_TUNE_ZONE2 = u'directTuneZone2'
 
 
@@ -76,7 +76,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			"(usb, usb)"                : "29",
 			"usb"                       : "2A",
 			"(network, net)"            : "2B",
-			"usb"                       : "2C",
+			#"usb"                       : "2C",
 			"multi-ch"                  : "30",
 			"xm"                        : "31",
 			"sirius"                    : "32",
@@ -136,11 +136,11 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def handleUnmanagedCommandInQueue(self, ipConnection, rpCommand):
 		if rpCommand.commandName == CMD_SEND_EISCP:
-			self.hostPlugin.logger.debug(u'Sending eISCP Command: ' + rpCommand.commandPayload)
+			self.hostPlugin.logger.debug(u'Sending eISCP Command: {0}'.format(rpCommand.commandPayload))
 			ipConnection.send(eISCP.command_to_packet(rpCommand.commandPayload))
 			self.hostPlugin.logger.threaddebug(u'Send command completed.')
 		elif rpCommand.commandName == CMD_DIRECT_TUNE or rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
-			self.hostPlugin.logger.debug(u'Received direct tune action to ' + rpCommand.commandPayload)
+			self.hostPlugin.logger.debug(u'Received direct tune action to {0}'.format(rpCommand.commandPayload))
 			if '.' in rpCommand.commandPayload:
 				# this is an FM station, pad to 2 digits to right of decimal, others to left
 				fmStationInfo = rpCommand.commandPayload.split('.')
@@ -153,7 +153,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			if rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
 				tuneCommandPrefix = "TUZ"
 				
-			self.hostPlugin.logger.debug(u'Sending tune command for ' + tuneToStation)				
+			self.hostPlugin.logger.debug(u'Sending tune command for {0}'.format(tuneToStation))
 			ipConnection.send(eISCP.command_to_packet(tuneCommandPrefix + tuneToStation))
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -169,7 +169,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			try:
 				return str(eISCP.iscp_to_command(eISCP.ISCPMessage.parse(message)))
 			except:
-				self.hostPlugin.logger.debug(u'Failed to parse eISCP message, message ignored: ' + RPFramework.RPFrameworkUtils.to_unicode(message))
+				self.hostPlugin.logger.debug(u'Failed to parse eISCP message, message ignored: {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(message)))
 				return message
 		else:
 			return u''
@@ -206,7 +206,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		# update the two "current inputs" on the server...
 		self.indigoDevice.updateStateOnServer(key=u'currentInputNumber', value=inputDefinition[0])
 		self.indigoDevice.updateStateOnServer(key=u'currentInputLabel', value=inputDefinition[1])
-		self.hostPlugin.logger.debug(u'Updating current input number/label: ' + inputDefinition[0] + u' / ' + inputDefinition[1])
+		self.hostPlugin.logger.debug(u'Updating current input number/label: {0} / {1}'.format(inputDefinition[0], inputDefinition[1]))
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback is made whenever the plugin has received the response to a status
@@ -221,7 +221,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		# update the two "current inputs" on the server...
 		self.indigoDevice.updateStateOnServer(key=u'zone2InputNumber', value=inputDefinition[0])
 		self.indigoDevice.updateStateOnServer(key=u'zone2InputLabel', value=inputDefinition[1])
-		self.hostPlugin.logger.debug(u'Updating zone 2 input number/label: ' + inputDefinition[0] + u' / ' + inputDefinition[1])
+		self.hostPlugin.logger.debug(u'Updating zone 2 input number/label: {0} / {1}'.format(inputDefinition[0], inputDefinition[1]))
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback will be triggered whenever an update to the Master Volume has been
@@ -235,13 +235,13 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			
 			# update the volume of the virtual controller if it is different than the master...
 			if volumeController.indigoDevice.states.get(u'brightnessLevel', 0) != self.indigoDevice.states.get(u'masterVolumeLevel', 0):
-				self.hostPlugin.logger.debug(u'Setting Master Volume Virtual Controller brightness to ' + RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'masterVolumeLevel', 0)))
+				self.hostPlugin.logger.debug(u'Setting Master Volume Virtual Controller brightness to {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'masterVolumeLevel', 0))))
 				volumeController.indigoDevice.updateStateOnServer(key=u'brightnessLevel', value=self.indigoDevice.states.get(u'masterVolumeLevel', 0))
 
 			# determine the on/off state for the controller
 			isOn = self.indigoDevice.states.get(u'isPoweredOn', False) == True and self.indigoDevice.states.get(u'isMuted', True) == False and self.indigoDevice.states.get(u'masterVolumeLevel', 0) > 0
 			if volumeController.indigoDevice.states.get(u'onOffState', False) != isOn:
-				self.hostPlugin.logger.debug(u'Setting On/Off state to: ' + RPFramework.RPFrameworkUtils.to_unicode(isOn))
+				self.hostPlugin.logger.debug(u'Setting On/Off state to: {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(isOn)))
 				volumeController.indigoDevice.updateStateOnServer(key=u'onOffState', value=isOn)
 					
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -256,13 +256,13 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 			
 			# update the volume of the virtual controller if it is different than the master...
 			if volumeController.indigoDevice.states.get(u'brightnessLevel', 0) != self.indigoDevice.states.get(u'zone2VolumeLevel', 0):
-				self.hostPlugin.logger.debug(u'Setting Zone 2 Volume Virtual Controller brightness to ' + RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'zone2VolumeLevel', 0)))
+				self.hostPlugin.logger.debug(u'Setting Zone 2 Volume Virtual Controller brightness to {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'zone2VolumeLevel', 0))))
 				volumeController.indigoDevice.updateStateOnServer(key=u'brightnessLevel', value=self.indigoDevice.states.get(u'zone2VolumeLevel', 0))
 
 			# determine the on/off state for the controller
 			isOn = self.indigoDevice.states.get(u'zone2PoweredOn', False) == True and self.indigoDevice.states.get(u'isMuted', True) == False and self.indigoDevice.states.get(u'zone2VolumeLevel', 0) > 0
 			if volumeController.indigoDevice.states.get(u'onOffState', False) != isOn:
-				self.hostPlugin.logger.debug(u'Setting On/Off state to: ' + RPFramework.RPFrameworkUtils.to_unicode(isOn))
+				self.hostPlugin.logger.debug(u'Setting On/Off state to: {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(isOn)))
 				volumeController.indigoDevice.updateStateOnServer(key=u'onOffState', value=isOn)
 				
 	
@@ -276,7 +276,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 	def parseEISCPInputDefinition(self, eiscpInputDefn):
 		# attempt to find both the input number and name from our lookup tables
 		inputNumber = self.inputSelectorEISCPMappings.get(eiscpInputDefn, "")
-		inputDesc = self.inputChannelToDescription.get(inputNumber, "")
+		inputDesc   = self.inputChannelToDescription.get(inputNumber, "")
 		return (inputNumber, inputDesc)
 	
 
