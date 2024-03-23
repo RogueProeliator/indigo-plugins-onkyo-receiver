@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
+#######################################################################################
 # Onkyo Network Remote Control by RogueProeliator <rp@rogueproeliator.com>
 # 	Indigo plugin designed to allow full control of Onkyo Receivers via their network
 #	interface
@@ -10,154 +9,135 @@
 #	in the open source project on GitHub:
 #	https://github.com/miracle2k/onkyo-eiscp
 #
-#	This plugin is released under an MIT license - this is a very simple and permissive
-#	license and may be found in the LICENSE.txt file found in the root of this plugin's
-#	GitHub repository:
-#		https://github.com/RogueProeliator/IndigoPlugins-Onkyo-Receiver-Network-Remote
-#
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
+#######################################################################################
 
-
-#/////////////////////////////////////////////////////////////////////////////////////////
-# Python imports
-#/////////////////////////////////////////////////////////////////////////////////////////
+# region Python imports
 import operator
 import re
 import socket
 import string
 
-import RPFramework
+from RPFramework.RPFrameworkPlugin import RPFrameworkPlugin
 import onkyoNetworkRemoteDevice
 import eISCP
+#endregion
 
 
-#/////////////////////////////////////////////////////////////////////////////////////////
-# Constants and configuration variables
-#/////////////////////////////////////////////////////////////////////////////////////////
+class Plugin(RPFrameworkPlugin):
 
-
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
-# Plugin
-#	Primary Indigo plugin class that is universal for all devices (receivers) to be
-#	controlled
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
-class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
-	
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Class construction and destruction methods
-	#/////////////////////////////////////////////////////////////////////////////////////
+	#######################################################################################
+	# region Class construction and destruction methods
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# Constructor called once upon plugin class creation; setup the device tracking
 	# variables for later use
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
+	def __init__(self, plugin_id, plugin_display_name, plugin_version, plugin_prefs):
 		# RP framework base class's init method
-		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, managedDeviceClassModule=onkyoNetworkRemoteDevice)
-	
-	
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Configuration and Action Dialog Callbacks
-	#/////////////////////////////////////////////////////////////////////////////////////
+		super().__init__(plugin_id, plugin_display_name, plugin_version, plugin_prefs, managed_device_class_module=onkyoNetworkRemoteDevice)
+
+	# endregion
+	#######################################################################################
+
+	#######################################################################################
+	# region Actions object callback handlers/routines
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called in order to determine which state should be shown in the
 	# "State" column on the Indigo devices list
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getDeviceDisplayStateId(self, dev):
 		# this comes from the user's selection, stored in the device properties
-		stateId = dev.pluginProps.get(u'stateDisplayColumnState', u'connectionState')
-		self.logger.debug(u'Returning state for State column: {0}'.format(stateId))
-		return stateId
+		state_id = dev.pluginProps.get("stateDisplayColumnState", "connectionState")
+		self.logger.debug(f"Returning state for State column: {state_id}")
+		return state_id
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called by the device configuration dialog in order to get the
 	# menu of available Onkyo devices
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def discoverOnkyoDevices(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
-		foundReceivers = []
+	def discover_onkyo_devices(self, filter="", valuesDict=None, typeId="", targetId=0):
+		found_receivers = []
 		for receiver in eISCP.eISCP.discover(timeout=1):
-			foundReceivers.append((u'%s:%s' % (receiver.host, receiver.port), u'%s:%s' % (receiver.info['model_name'], receiver.host)))
-		return foundReceivers
+			found_receivers.append((f"{receiver.host}:{receiver.port}", f"{receiver.info['model_name']}:{receiver.host}"))
+		return found_receivers
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called whenever the user has clicked to use the selected onkyo
 	# from the menu of discovered devices
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def selectEnumeratedOnkyoForUse(self, valuesDict=None, filter=u'', typeId=u'', targetId=0):
-		selectedDeviceInfo = valuesDict.get(u'onkyoReceiversFound', u'')
-		if selectedDeviceInfo != u'':
-			addressInfo = selectedDeviceInfo.split(':')
-			valuesDict[u'ipAddress']  = addressInfo[0]
-			valuesDict[u'portNumber'] = addressInfo[1]
+	def select_enumerated_onkyo_for_use(self, valuesDict=None, filter="", typeId="", targetId=0):
+		selected_device_info = valuesDict.get("onkyoReceiversFound", "")
+		if selected_device_info != "":
+			addressInfo = selected_device_info.split(":")
+			valuesDict["ipAddress"]  = addressInfo[0]
+			valuesDict["portNumber"] = addressInfo[1]
 		return valuesDict
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called by the action configuration dialog to get the menu of zonesAvailable
 	# available for the device
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def getZoneSelectorMenu(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
-		zonesAvailable = []
-		rpDevice = self.managedDevices[targetId]
-		for zone in rpDevice.indigoDevice.pluginProps.get(u'deviceZonesConnected'):
-			zoneValue = zone
-			if zoneValue == u'main':
-				zoneText = u'Main'
+	def get_zone_selector_menu(self, filter="", valuesDict=None, typeId="", targetId=0):
+		zones_available = []
+		rp_device = self.managedDevices[targetId]
+		for zone in rp_device.indigoDevice.pluginProps.get("deviceZonesConnected"):
+			zone_value = zone
+			if zone_value == "main":
+				zone_text = "Main"
 			else:
-				zoneText = u'Zone {0}'.format(zoneValue[-1:])
-			zonesAvailable.append((zoneValue, zoneText))
-		return zonesAvailable
+				zone_text = f"Zone {zone_value[-1:]}"
+			zones_available.append((zone_value, zone_text))
+		return zones_available
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called by the action configuration dialog to retrieve either the
 	# list of all inputs ("all" or None for filter) or only the connected inputs
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def getInputSelectorMenu(self, filter=u'', valuesDict=None, typeId=u'', targetId=0):
-		self.logger.threaddebug(u'getInputSelectorMenu called for filter: {0}'.format(filter))
+	def get_input_selector_menu(self, filter="", valuesDict=None, typeId="", target_id=0):
+		self.logger.threaddebug(f"get_input_selector_menu called for filter: {filter}")
 	
-		inputsAvailable = []
-		if targetId in self.managedDevices:
-			rpDevice = self.managedDevices[targetId]
+		if target_id in self.managed_devices:
+			rp_device = self.managed_devices[target_id]
 		else:
-			rpDevice = onkyoNetworkRemoteDevice.OnkyoReceiverNetworkRemoteDevice(self, None)
+			rp_device = onkyoNetworkRemoteDevice.OnkyoReceiverNetworkRemoteDevice(self, None)
 		
-		if filter is None or filter == u'' or filter == u'all':
-			inputsAvailable = sorted(rpDevice.inputChannelToDescription.iteritems(), key=operator.itemgetter(1))
+		if filter is None or filter == "" or filter == "all":
+			inputs_available = sorted(rp_device.inputChannelToDescription.iteritems(), key=operator.itemgetter(1))
 		else:
 			# we need to get the list of inputs matching the selected/connected list from the device
-			connectedList = []
-			for inputNum in rpDevice.indigoDevice.pluginProps.get(u'deviceInputsConnected'):
-				connectedList.append((inputNum, rpDevice.inputChannelToDescription[inputNum]))
-			inputsAvailable = sorted(connectedList, key=operator.itemgetter(1))
+			connected_list = []
+			for input_num in rp_device.indigoDevice.pluginProps.get("deviceInputsConnected"):
+				connected_list.append((input_num, rp_device.inputChannelToDescription[input_num]))
+			inputs_available = sorted(connected_list, key=operator.itemgetter(1))
 			
-		return inputsAvailable
+		return inputs_available
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-	
 	# This routine will be called from the user executing the menu item action to send
 	# an arbitrary command code to the Onkyo receiver
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-	
-	def sendArbitraryCommand(self, valuesDict, typeId):
+	def send_arbitrary_command(self, valuesDict, typeId):
 		try:
-			deviceId = valuesDict.get(u'targetDevice', u'0')
-			commandCode = valuesDict.get(u'commandToSend', u'').strip()
+			device_id = valuesDict.get("targetDevice", "0")
+			command_code = valuesDict.get("commandToSend", "").strip()
 		
-			if deviceId == u'' or deviceId == u'0':
+			if device_id == "" or device_id == "0":
 				# no device was selected
-				errorDict = indigo.Dict()
-				errorDict[u'targetDevice'] = u'Please select a device'
-				return (False, valuesDict, errorDict)
-			elif commandCode == u'':
-				errorDict = indigo.Dict()
-				errorDict[u'commandToSend'] = u'Enter command to send'
-				return (False, valuesDict, errorDict)
+				error_dict = indigo.Dict()
+				error_dict["targetDevice"] = "Please select a device"
+				return False, valuesDict, error_dict
+			elif command_code == "":
+				error_dict = indigo.Dict()
+				error_dict["commandToSend"] = "Enter command to send"
+				return False, valuesDict, error_dict
 			else:
 				# send the code using the normal action processing...
-				actionParams = indigo.Dict()
-				actionParams[u'commandToSend'] = commandCode
-				self.executeAction(pluginAction=None, indigoActionId=u'SendArbitraryCommand', indigoDeviceId=int(deviceId), paramValues=actionParams)
-				return (True, valuesDict)
+				action_params = indigo.Dict()
+				action_params["commandToSend"] = command_code
+				self.execute_action(pluginAction=None, indigoActionId="SendArbitraryCommand", indigoDeviceId=int(device_id), paramValues=action_params)
+				return True, valuesDict
 		except:
-			self.logger.exception(u'Error sending arbitrary command: ')
-			return (False, valuesDict)	
-	
+			self.logger.exception("Error sending arbitrary command: ")
+			return False, valuesDict
+
+	# endregion
+	#######################################################################################

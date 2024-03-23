@@ -5,21 +5,21 @@
 	<Device type="custom" id="onkyoReceiverNetworkRemoteDevice">
 		<Name>Onkyo Receiver</Name>
 		<ConfigUI>	
-			<Field id="commOptionsTitle" type="label" fontColor="darkGray">
+			<Field id="commOptionsTitle" type="label" fontSize="small">
 				<Label>COMMUNICATION OPTIONS</Label>
 			</Field>
-			<Field id="instructionSeparator2" type="separator" />
+			<Field id="instructionSeparator2" type="separator" fontSize="small" />
 			<Field id="onkyoSelectionInstructions" type="label" fontSize="small">
 				<Label>Please select or manually enter the IP address of the Onkyo to control. Note that it is recommended to have the receiver on a static IP address to avoid the plugin losing connection should the DHCP server provide a new IP after configuration.</Label>
 			</Field>
 			<Field id="onkyoReceiversFound" type="menu" filter="">
 				<Label>Onkyo Receivers Found:</Label>
-				<List method="discoverOnkyoDevices" class="self" filter="all" />
+				<List method="discover_onkyo_devices" class="self" filter="all" />
 			</Field>
 			<Field id="selectEnumeratedDevice" type="button" enabledBindingId="onkyoReceiversFound">
 				<Label></Label>
 				<Title>Use Selected Onkyo</Title>
-				<CallbackMethod>selectEnumeratedOnkyoForUse</CallbackMethod>
+				<CallbackMethod>select_enumerated_onkyo_for_use</CallbackMethod>
 			</Field>
 			<Field id="ipAddress" type="textfield">
 				<Label>Receiver Host/IP Address:</Label>	
@@ -34,10 +34,10 @@
 				<Label>This interval, specified in seconds, determines how often the plugin attempts to read the status of all states of the receiver; this is used to update the plugin whenever a manual change has occurred (such as a change by the physical remote remote or buttons). Setting to 0 will disable status update polling.</Label>
 			</Field>
 			
-			<Field id="devConfigTitle" type="label" fontColor="darkGray">
+			<Field id="devConfigTitle" type="label" fontSize="small">
 				<Label>DEVICE CONNECTIONS CONFIGURATION</Label>
 			</Field>
-			<Field id="devConnSeparator" type="separator" />
+			<Field id="devConnSeparator" type="separator" fontSize="small" />
 			<Field id="deviceZonesConnected" type="list" defaultValue="main">
 				<Label>Connected Zones:</Label>
 				<List>
@@ -47,13 +47,13 @@
 			</Field>
 			<Field id="deviceInputsConnected" type="list" filter="">
 				<Label>Connected Inputs:</Label>
-				<List method="getInputSelectorMenu" class="self" filter="all" />
+				<List method="get_input_selector_menu" class="self" filter="all" />
 			</Field>
 			
-			<Field id="devDisplayConfigTitle" type="label" fontColor="darkGray">
+			<Field id="devDisplayConfigTitle" type="label" fontSize="small">
 				<Label>INDIGO DISPLAY OPTIONS</Label>
 			</Field>
-			<Field id="devDisplayConfigSeparator" type="separator" />
+			<Field id="devDisplayConfigSeparator" type="separator" fontSize="small" />
 			<Field id="stateDisplayColumnState" type="menu" defaultValue="connectionState">
 				<Label>State Column:</Label>
 				<List>

@@ -1,53 +1,43 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
+#######################################################################################
 # Onkyo Network Remote Control by RogueProeliator <rp@rogueproeliator.com>
-# 	See plugin.py for more plugin details and information
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
+#######################################################################################
 
-#/////////////////////////////////////////////////////////////////////////////////////////
-# Python imports
-#/////////////////////////////////////////////////////////////////////////////////////////
-import re	
+# region Python imports
+import re
 import sys
 import select
 import threading
 import time
 
 import indigo
-import RPFramework
+from RPFramework.RPFrameworkTelnetDevice import RPFrameworkTelnetDevice
+from RPFramework.RPFrameworkNonCommChildDevice import RPFrameworkNonCommChildDevice
+from RPFramework.RPFrameworkCommand import RPFrameworkCommand
 import eISCP
+# endregion
 
-
-#/////////////////////////////////////////////////////////////////////////////////////////
-# Constants and configuration variables
-#/////////////////////////////////////////////////////////////////////////////////////////
+#######################################################################################
+# region Constants and configuration variables
 CMD_SEND_EISCP        = u'sendEISCPCommand'
 CMD_DIRECT_TUNE       = u'directTune'
 CMD_DIRECT_TUNE_ZONE2 = u'directTuneZone2'
+# endregion
+#######################################################################################
 
 
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
-# OnkyoReceiverNetworkRemoteDevice
-#	Handles the configuration of a single Onkyo device that is connected to this plugin;
-#	this class does all the 'grunt work' of communications with the receiver
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
-class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFrameworkTelnetDevice):
-	
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Class construction and destruction methods
-	#/////////////////////////////////////////////////////////////////////////////////////
+class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
+
+	#######################################################################################
+	# region Class construction and destruction methods
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# Constructor called once upon plugin class receiving a command to start device
 	# communication. The plugin will call other commands when needed, simply zero out the
 	# member variables
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, plugin, device):
-		super(OnkyoReceiverNetworkRemoteDevice, self).__init__(plugin, device, connectionType=RPFramework.RPFrameworkTelnetDevice.CONNECTIONTYPE_SOCKET)
+		super().__init__(plugin, device, connection_type=RPFrameworkTelnetDevice.CONNECTIONTYPE_SOCKET)
 		
 		# create the dictionary that maps input selector values to/from their respective numbers
 		self.inputSelectorEISCPMappings = {
@@ -116,187 +106,184 @@ class OnkyoReceiverNetworkRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFra
 		
 		# record the new states that have been added so that the device will automatically reload the
 		# state list from the Devices.xml
-		self.upgradedDeviceStates.append(u'zone2PoweredOn')
-		self.upgradedDeviceStates.append(u'zone2InputNumber')
-		self.upgradedDeviceStates.append(u'zone2InputLabel')
-		self.upgradedDeviceStates.append(u'zone2VolumeLevel')
-		self.upgradedDeviceStates.append(u'tunerFrequency')
-		self.upgradedDeviceStates.append(u'networkPlayTitle')
-		self.upgradedDeviceStates.append(u'networkPlayAlbum')
-		self.upgradedDeviceStates.append(u'networkPlayArtist')
-		self.upgradedDeviceStates.append(u'networkPlayStatus')
+		self.upgraded_device_states.append("zone2PoweredOn")
+		self.upgraded_device_states.append("zone2InputNumber")
+		self.upgraded_device_states.append("zone2InputLabel")
+		self.upgraded_device_states.append("zone2VolumeLevel")
+		self.upgraded_device_states.append("tunerFrequency")
+		self.upgraded_device_states.append("networkPlayTitle")
+		self.upgraded_device_states.append("networkPlayAlbum")
+		self.upgraded_device_states.append("networkPlayArtist")
+		self.upgraded_device_states.append("networkPlayStatus")
+
+	# endregion
+	#######################################################################################
 		
-		
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Processing and command functions
-	#/////////////////////////////////////////////////////////////////////////////////////
+	#######################################################################################
+	# region Processing and command functions
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should be overridden in individual device classes whenever they must
 	# handle custom commands that are not already defined
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def handleUnmanagedCommandInQueue(self, ipConnection, rpCommand):
-		if rpCommand.commandName == CMD_SEND_EISCP:
-			self.hostPlugin.logger.debug(u'Sending eISCP Command: {0}'.format(rpCommand.commandPayload))
-			ipConnection.send(eISCP.command_to_packet(rpCommand.commandPayload))
-			self.hostPlugin.logger.threaddebug(u'Send command completed.')
-		elif rpCommand.commandName == CMD_DIRECT_TUNE or rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
-			self.hostPlugin.logger.debug(u'Received direct tune action to {0}'.format(rpCommand.commandPayload))
-			if '.' in rpCommand.commandPayload:
+	def handle_unmanaged_command_in_queue(self, ip_connection, rp_command):
+		if rp_command.command_name == CMD_SEND_EISCP:
+			self.host_plugin.logger.debug(f"Sending eISCP Command: {rp_command.command_payload}")
+			ip_connection.send(eISCP.command_to_packet(rp_command.command_payload))
+			self.host_plugin.logger.threaddebug("Send command completed.")
+		elif rp_command.command_name == CMD_DIRECT_TUNE or rp_command.command_name == CMD_DIRECT_TUNE_ZONE2:
+			self.host_plugin.logger.debug(f"Received direct tune action to {rp_command.commandPayload}")
+			if "." in rp_command.commandPayload:
 				# this is an FM station, pad to 2 digits to right of decimal, others to left
-				fmStationInfo = rpCommand.commandPayload.split('.')
-				tuneToStation = fmStationInfo[0].rjust(3, '0') + fmStationInfo[1].ljust(2, '0')
+				fm_station_info = rp_command.commandPayload.split(".")
+				tune_to_station = fm_station_info[0].rjust(3, "0") + fm_station_info[1].ljust(2, "0")
 			else:
 				# this is an AM or SR station, do all padding to the left
-				tuneToStation = rpCommand.commandPayload.rjust(5, '0')
+				tune_to_station = rp_command.command_payload.rjust(5, "0")
 				
-			tuneCommandPrefix = "TUN"
-			if rpCommand.commandName == CMD_DIRECT_TUNE_ZONE2:
-				tuneCommandPrefix = "TUZ"
+			tune_command_prefix = "TUN"
+			if rp_command.command_name == CMD_DIRECT_TUNE_ZONE2:
+				tune_command_prefix = "TUZ"
 				
-			self.hostPlugin.logger.debug(u'Sending tune command for {0}'.format(tuneToStation))
-			ipConnection.send(eISCP.command_to_packet(tuneCommandPrefix + tuneToStation))
+			self.host_plugin.logger.debug(f"Sending tune command for {tune_to_station}")
+			ip_connection.send(eISCP.command_to_packet(tune_command_prefix + tune_to_station))
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should attempt to read a line of text from the connection, using the
 	# provided timeout as the upper-limit to wait
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def readLine(self, connection, lineEndingToken, commandResponseTimeout):
-		eISCPData = select.select([connection], [], [], commandResponseTimeout)
+	def read_line(self, connection, line_ending_token, command_response_timeout):
+		eISCPData = select.select([connection], [], [], command_response_timeout)
 		if eISCPData[0]:
 			header_bytes = connection.recv(16)
 			header       = eISCP.eISCPPacket.parse_header(header_bytes)
 			message      = connection.recv(header.data_size)
 			try:
-				return str(eISCP.iscp_to_command(eISCP.ISCPMessage.parse(message)))
+				return f"{eISCP.iscp_to_command(eISCP.ISCPMessage.parse(message))}"
 			except:
-				self.hostPlugin.logger.debug(u'Failed to parse eISCP message, message ignored: {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(message)))
+				self.host_plugin.logger.debug(f"Failed to parse eISCP message, message ignored: {message}")
 				return message
 		else:
-			return u''
+			return ""
 			
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine should attempt to read a line of text from the connection only if there
 	# is an indication of waiting data (there is no waiting until a specified timeout)
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def readIfAvailable(self, connection, lineEndingToken, commandResponseTimeout):
-		return self.readLine(connection, lineEndingToken, commandResponseTimeout)
-	
-	
+	def read_if_available(self, connection, line_ending_token, command_response_timeout):
+		return self.read_line(connection, line_ending_token, command_response_timeout)
+
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine should return a touple of information about the connection - in the
+	# This routine should return a tuple of information about the connection - in the
 	# format of (ipAddress/HostName, portNumber)
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def getDeviceAddressInfo(self):
-		return (self.indigoDevice.pluginProps.get(u'ipAddress', u''), int(self.indigoDevice.pluginProps.get(u'portNumber', u'60128')))	
+	def get_device_address_info(self):
+		return (self.indigo_device.pluginProps.get("ipAddress", ""), int(self.indigo_device.pluginProps.get("portNumber", "60128")))
+
+	# endregion
+	#######################################################################################
 		
-		
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Custom Response Handlers
-	#/////////////////////////////////////////////////////////////////////////////////////
+	#######################################################################################
+	#region Custom Response Handlers
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback is made whenever the plugin has received the response to a status
 	# request for the current input for the receiver
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def inputSelectorQueryReceived(self, responseObj, rpCommand):
-		valueSplitter   = re.compile(r"^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$")
-		valueMatch      = valueSplitter.search(responseObj)
-		inputValue      = valueMatch.groupdict().get(u'value').replace("'", "")
-		inputDefinition = self.parseEISCPInputDefinition(inputValue)
+	def input_selector_query_received(self, response_obj, rp_command):
+		value_splitter   = re.compile(r"^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$")
+		value_match      = value_splitter.search(response_obj)
+		input_value      = value_match.groupdict().get("value").replace("'", "")
+		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
-		self.indigoDevice.updateStateOnServer(key=u'currentInputNumber', value=inputDefinition[0])
-		self.indigoDevice.updateStateOnServer(key=u'currentInputLabel', value=inputDefinition[1])
-		self.hostPlugin.logger.debug(u'Updating current input number/label: {0} / {1}'.format(inputDefinition[0], inputDefinition[1]))
+		self.indigo_device.updateStateOnServer(key="currentInputNumber", value=input_definition[0])
+		self.indigo_device.updateStateOnServer(key="currentInputLabel", value=input_definition[1])
+		self.host_plugin.logger.debug(f"Updating current input number/label: {input_definition[0]} / {input_definition[1]}")
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback is made whenever the plugin has received the response to a status
 	# request for the current input for Zone 2 of the receiver
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def zone2SelectorQueryReceived(self, responseObj, rpCommand):
-		valueSplitter   = re.compile(r"^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
-		valueMatch      = valueSplitter.search(responseObj)
-		inputValue      = valueMatch.groupdict().get(u'value').replace(u"'", u"")
-		inputDefinition = self.parseEISCPInputDefinition(inputValue)
+	def zone2_selector_query_received(self, response_obj, rp_command):
+		value_splitter   = re.compile(r"^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
+		value_match      = value_splitter.search(response_obj)
+		input_value      = value_match.groupdict().get("value").replace("'", "")
+		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
-		self.indigoDevice.updateStateOnServer(key=u'zone2InputNumber', value=inputDefinition[0])
-		self.indigoDevice.updateStateOnServer(key=u'zone2InputLabel', value=inputDefinition[1])
-		self.hostPlugin.logger.debug(u'Updating zone 2 input number/label: {0} / {1}'.format(inputDefinition[0], inputDefinition[1]))
+		self.indigo_device.updateStateOnServer(key="zone2InputNumber", value=input_definition[0])
+		self.indigo_device.updateStateOnServer(key="zone2InputLabel", value=input_definition[1])
+		self.host_plugin.logger.debug(f"Updating zone 2 input number/label: {input_definition[0]} / {input_definition[1]}")
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback will be triggered whenever an update to the Master Volume has been
 	# found; it should update any virtual controllers attached
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def updateVirtualMasterVolume(self, responseObj, rpCommand):
-		if u'main' in self.childDevices:
+	def update_virtual_master_volume(self, response_obj, rp_command):
+		if "main" in self.child_devices:
 			# find the child device and ensure we have the latest version of the states
-			volumeController = self.childDevices[u'main']
-			volumeController.reloadIndigoDevice()
+			volume_controller = self.childDevices["main"]
+			volume_controller.reload_indigo_device()
 			
 			# update the volume of the virtual controller if it is different than the master...
-			if volumeController.indigoDevice.states.get(u'brightnessLevel', 0) != self.indigoDevice.states.get(u'masterVolumeLevel', 0):
-				self.hostPlugin.logger.debug(u'Setting Master Volume Virtual Controller brightness to {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'masterVolumeLevel', 0))))
-				volumeController.indigoDevice.updateStateOnServer(key=u'brightnessLevel', value=self.indigoDevice.states.get(u'masterVolumeLevel', 0))
+			if volume_controller.indigo_device.states.get("brightnessLevel", 0) != self.indigoDevice.states.get("masterVolumeLevel", 0):
+				self.host_plugin.logger.debug(f"Setting Master Volume Virtual Controller brightness to {self.indigoDevice.states.get('masterVolumeLevel', 0)}")
+				volume_controller.indigo_device.updateStateOnServer(key="brightnessLevel", value=self.indigo_device.states.get("masterVolumeLevel", 0))
 
 			# determine the on/off state for the controller
-			isOn = self.indigoDevice.states.get(u'isPoweredOn', False) == True and self.indigoDevice.states.get(u'isMuted', True) == False and self.indigoDevice.states.get(u'masterVolumeLevel', 0) > 0
-			if volumeController.indigoDevice.states.get(u'onOffState', False) != isOn:
-				self.hostPlugin.logger.debug(u'Setting On/Off state to: {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(isOn)))
-				volumeController.indigoDevice.updateStateOnServer(key=u'onOffState', value=isOn)
+			is_on = self.indigo_device.states.get("isPoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("masterVolumeLevel", 0) > 0
+			if volume_controller.indigo_device.states.get("onOffState", False) != is_on:
+				self.host_plugin.logger.debug(f"Setting On/Off state to: {is_on}")
+				volume_controller.indigo_device.updateStateOnServer(key="onOffState", value=is_on)
 					
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback will be triggered whenever an update to the Zone 2 Volume has been
 	# found; it should update any virtual controllers attached
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def updateVirtualZone2Volume(self, responseObj, rpCommand):
-		if u'zone2' in self.childDevices:
+	def update_virtual_zone2_volume(self, response_obj, rp_command):
+		if "zone2" in self.child_devices:
 			# find the child device and ensure we have the latest version of the states
-			volumeController = self.childDevices[u'zone2']
-			volumeController.reloadIndigoDevice()
+			volume_controller = self.childDevices["zone2"]
+			volume_controller.reload_indigo_device()
 			
 			# update the volume of the virtual controller if it is different than the master...
-			if volumeController.indigoDevice.states.get(u'brightnessLevel', 0) != self.indigoDevice.states.get(u'zone2VolumeLevel', 0):
-				self.hostPlugin.logger.debug(u'Setting Zone 2 Volume Virtual Controller brightness to {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(self.indigoDevice.states.get(u'zone2VolumeLevel', 0))))
-				volumeController.indigoDevice.updateStateOnServer(key=u'brightnessLevel', value=self.indigoDevice.states.get(u'zone2VolumeLevel', 0))
+			if volume_controller.indigo_device.states.get("brightnessLevel", 0) != self.indigo_device.states.get("zone2VolumeLevel", 0):
+				self.host_plugin.logger.debug(f"Setting Zone 2 Volume Virtual Controller brightness to {self.indigoDevice.states.get('zone2VolumeLevel', 0)}")
+				volume_controller.indigo_device.updateStateOnServer(key="brightnessLevel", value=self.indigo_device.states.get("zone2VolumeLevel", 0))
 
 			# determine the on/off state for the controller
-			isOn = self.indigoDevice.states.get(u'zone2PoweredOn', False) == True and self.indigoDevice.states.get(u'isMuted', True) == False and self.indigoDevice.states.get(u'zone2VolumeLevel', 0) > 0
-			if volumeController.indigoDevice.states.get(u'onOffState', False) != isOn:
-				self.hostPlugin.logger.debug(u'Setting On/Off state to: {0}'.format(RPFramework.RPFrameworkUtils.to_unicode(isOn)))
-				volumeController.indigoDevice.updateStateOnServer(key=u'onOffState', value=isOn)
-				
+			is_on = self.indigo_device.states.get("zone2PoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("zone2VolumeLevel", 0) > 0
+			if volume_controller.indigo_device.states.get("onOffState", False) != is_on:
+				self.hostPlugin.logger.debug(f"Setting On/Off state to: {is_on}")
+				volume_controller.indigo_device.updateStateOnServer(key="onOffState", value=is_on)
+
+	# endregion
+	#######################################################################################
 	
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Utility routines
-	#/////////////////////////////////////////////////////////////////////////////////////
+	#######################################################################################
+	#region Utility routines
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will parse the return from an eISCP input query to the equivalent
 	# "human readable" form. Return is tuple - ("input#", "Description")
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def parseEISCPInputDefinition(self, eiscpInputDefn):
+	def parse_eiscp_input_definition(self, eiscp_input_defn):
 		# attempt to find both the input number and name from our lookup tables
-		inputNumber = self.inputSelectorEISCPMappings.get(eiscpInputDefn, "")
-		inputDesc   = self.inputChannelToDescription.get(inputNumber, "")
-		return (inputNumber, inputDesc)
-	
+		input_number = self.inputSelectorEISCPMappings.get(eiscp_input_defn, "")
+		input_desc   = self.inputChannelToDescription.get(input_number, "")
+		return input_number, input_desc
 
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
-# OnkyoVirtualVolumeController
-#	Handles the volume control for an Onkyo device, modeled after a dimmer so that it may
-#	be operated as a slider on client devices
-#/////////////////////////////////////////////////////////////////////////////////////////
-#/////////////////////////////////////////////////////////////////////////////////////////
-class OnkyoVirtualVolumeController(RPFramework.RPFrameworkNonCommChildDevice.RPFrameworkNonCommChildDevice):
+	# endregion
+	#######################################################################################
+
+
+class OnkyoVirtualVolumeController(RPFrameworkNonCommChildDevice):
 	
-	#/////////////////////////////////////////////////////////////////////////////////////
+	#######################################################################################
 	# Class construction and destruction methods
-	#/////////////////////////////////////////////////////////////////////////////////////
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# Constructor called once upon plugin class receiving a command to start device
 	# communication. The plugin will call other commands when needed, simply zero out the
 	# member variables
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, plugin, device):
-		super(OnkyoVirtualVolumeController, self).__init__(plugin, device)
+		super().__init__(plugin, device)
 		

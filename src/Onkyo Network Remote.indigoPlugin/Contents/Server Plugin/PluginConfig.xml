@@ -1,27 +1,19 @@
 <?xml version="1.0"?>
 <PluginConfig>	
-	<Field id="pluginTitleLabel" type="label">
+	<Field id="pluginTitleLabel" type="label" fontSize="large">
         <Label>Onkyo Receiver Network Remote</Label>
     </Field>
     <Field id="pluginAuthorLabel" type="label" fontSize="small">
         <Label>Developed by RogueProeliator</Label>
     </Field>    
-
-	<Field type="label" id="aboutSpacer" fontSize="small">
-		<Label></Label>
-	</Field>
-	<Field id="aboutTitle" type="label" fontColor="darkGray">
-		<Label>ABOUT</Label>
-	</Field>
-	<Field id="aboutSeparator" type="separator" />
-    <Field id="pluginDescriptionLabel" type="label" fontSize="small">
+	<Field id="pluginDescriptionLabel" type="label" fontSize="small">
 		<Label>This Indigo plugin allows Indigo to act as a remote display and/or control for a network-connected Onkyo Receiver.</Label>
 	</Field>
 	
 	<Field type="label" id="debugSpacer" fontSize="small">
 		<Label></Label>
 	</Field>
-	<Field id="debugOptionsTitle" type="label" fontColor="darkGray">
+	<Field id="debugOptionsTitle" type="label" fontSize="small">
 		<Label>DEBUGGING OPTIONS</Label>
 	</Field>
 	<Field id="debugSeparator2" type="separator" />

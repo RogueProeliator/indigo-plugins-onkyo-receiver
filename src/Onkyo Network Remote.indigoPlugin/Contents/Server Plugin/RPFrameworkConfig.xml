@@ -60,7 +60,7 @@
 								<updateValueExFormat><![CDATA["On" if re.match("\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on" else "Standby"]]></updateValueExFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
-								<updateParam>updateVirtualMasterVolume</updateParam>
+								<updateParam>update_virtual_master_volume</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
@@ -96,7 +96,7 @@
 								<updateValueFormat><![CDATA[int(re.match("^\(\('master\-volume',\s*\'volume\'\),\s*\'{0,1}(?P<value>[A-F\d]+)\'{0,1}\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
-								<updateParam>updateVirtualMasterVolume</updateParam>
+								<updateParam>update_virtual_master_volume</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
@@ -110,7 +110,7 @@
 								<updateValueFormat><![CDATA[int(re.match("^\('volume',\s{0,1}'(?P<value>[A-F\d]+)'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
-								<updateParam>updateVirtualZone2Volume</updateParam>
+								<updateParam>update_virtual_zone2_volume</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
@@ -124,7 +124,7 @@
 								<updateValueFormat><![CDATA[0]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
-								<updateParam>updateVirtualZone2Volume</updateParam>
+								<updateParam>update_virtual_zone2_volume</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
@@ -138,7 +138,7 @@
 								<updateValueFormat><![CDATA[re.match("\('audio\-muting',\s{0,1}'(?P<value>(on)|(off))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
-								<updateParam>updateVirtualMasterVolume</updateParam>
+								<updateParam>update_virtual_master_volume</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
@@ -169,7 +169,7 @@
 						<matchExpression><![CDATA[^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
-								<updateParam>inputSelectorQueryReceived</updateParam>
+								<updateParam>input_selector_query_received</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
@@ -179,7 +179,7 @@
 						<matchExpression><![CDATA[^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
-								<updateParam>zone2SelectorQueryReceived</updateParam>
+								<updateParam>zone2_selector_query_received</updateParam>
 								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
