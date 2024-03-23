@@ -89,14 +89,14 @@ class OrderedDict(dict, DictMixin):
     def keys(self):
         return list(self)
 
-    setdefault = DictMixin.setdefault
-    update = DictMixin.update
-    pop = DictMixin.pop
-    values = DictMixin.values
-    items = DictMixin.items
-    iterkeys = DictMixin.iterkeys
-    itervalues = DictMixin.itervalues
-    iteritems = DictMixin.iteritems
+    setdefault = MutableMapping.setdefault
+    update = MutableMapping.update
+    pop = MutableMapping.pop
+    values = MutableMapping.values
+    items = MutableMapping.items
+    iterkeys = MutableMapping.keys
+    itervalues = MutableMapping.values
+    iteritems = MutableMapping.items
 
     def __repr__(self):
         if not self:

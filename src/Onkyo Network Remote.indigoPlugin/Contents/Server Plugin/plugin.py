@@ -33,7 +33,7 @@ class Plugin(RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, plugin_id, plugin_display_name, plugin_version, plugin_prefs):
 		# RP framework base class's init method
-		super().__init__(plugin_id, plugin_display_name, plugin_version, plugin_prefs, managed_device_class_module=onkyoNetworkRemoteDevice)
+		super().__init__(plugin_id, plugin_display_name, plugin_version, plugin_prefs, managedDeviceClassModule=onkyoNetworkRemoteDevice)
 
 	# endregion
 	#######################################################################################

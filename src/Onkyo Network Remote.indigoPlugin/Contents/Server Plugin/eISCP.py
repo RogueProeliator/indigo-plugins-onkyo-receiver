@@ -2,7 +2,7 @@ import re
 import struct
 import time
 import socket, select
-import Queue, threading
+import threading
 #from collections import namedtuple
 
 import eISCPCommands
@@ -37,7 +37,7 @@ def namedtuple(typename, field_names, verbose=False, rename=False):
 
     # Parse and validate the field names.  Validation serves two purposes,
     # generating informative error messages and preventing template injection attacks.
-    if isinstance(field_names, basestring):
+    if isinstance(field_names, str):
         field_names = field_names.replace(',', ' ').split() # names separated by whitespace and/or commas
     field_names = tuple(map(str, field_names))
     if rename:
@@ -104,9 +104,9 @@ def namedtuple(typename, field_names, verbose=False, rename=False):
     namespace = dict(_itemgetter=_itemgetter, __name__='namedtuple_%s' % typename,
                      _property=property, _tuple=tuple)
     try:
-        exec template in namespace
+        exec(template, namespace)
     except SyntaxError:
-        raise Exception(u'Syntax Error in template: ' + template)
+        raise Exception(f"Syntax Error in template: {template}")
     result = namespace[typename]
 
     # For pickling to work, the __module__ variable needs to be set to the frame

@@ -20,9 +20,9 @@ import eISCP
 
 #######################################################################################
 # region Constants and configuration variables
-CMD_SEND_EISCP        = u'sendEISCPCommand'
-CMD_DIRECT_TUNE       = u'directTune'
-CMD_DIRECT_TUNE_ZONE2 = u'directTuneZone2'
+CMD_SEND_EISCP        = "sendEISCPCommand"
+CMD_DIRECT_TUNE       = "directTune"
+CMD_DIRECT_TUNE_ZONE2 = "directTuneZone2"
 # endregion
 #######################################################################################
 
@@ -177,7 +177,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# format of (ipAddress/HostName, portNumber)
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def get_device_address_info(self):
-		return (self.indigo_device.pluginProps.get("ipAddress", ""), int(self.indigo_device.pluginProps.get("portNumber", "60128")))
+		return self.indigo_device.pluginProps.get("ipAddress", ""), int(self.indigo_device.pluginProps.get("portNumber", "60128"))
 
 	# endregion
 	#######################################################################################
