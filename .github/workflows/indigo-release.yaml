@@ -21,13 +21,17 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: recursive
-    - uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r "Onkyo Network Remote.indigoPlugin.zip" "src/Onkyo Network Remote.indigoPlugin"
+
+    - name: Install Zip Archiver
+      uses: montudor/action-zip@v1
+
+    - name: Zip Plugin Artifact
+      run: zip -qq -r "Onkyo Network Remote.indigoPlugin.zip" "Onkyo Network Remote.indigoPlugin"
+      working-directory: src
 
     - uses: ncipollo/release-action@v1
       with:
         tag: ${{ github.event.inputs.release_num }}
-        artifacts: "Onkyo Network Remote.indigoPlugin.zip"
+        artifacts: "src/Onkyo Network Remote.indigoPlugin.zip"
         body: "Release"
         prerelease: ${{ github.event.inputs.is_prerelease }}
