@@ -20,9 +20,9 @@
 #     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #     OTHER DEALINGS IN THE SOFTWARE.
 
-from UserDict import DictMixin
+from collections.abc import MutableMapping
 
-class OrderedDict(dict, DictMixin):
+class OrderedDict(dict, MutableMapping):
 
     def __init__(self, *args, **kwds):
         if len(args) > 1:
