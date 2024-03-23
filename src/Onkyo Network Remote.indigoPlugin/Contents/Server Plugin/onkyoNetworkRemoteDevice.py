@@ -177,7 +177,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# format of (ipAddress/HostName, portNumber)
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def get_device_address_info(self):
-		return self.indigo_device.pluginProps.get("ipAddress", ""), int(self.indigo_device.pluginProps.get("portNumber", "60128"))
+		return self.indigoDevice.pluginProps.get("ipAddress", ""), int(self.indigoDevice.pluginProps.get("portNumber", "60128"))
 
 	# endregion
 	#######################################################################################
@@ -195,8 +195,8 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
-		self.indigo_device.updateStateOnServer(key="currentInputNumber", value=input_definition[0])
-		self.indigo_device.updateStateOnServer(key="currentInputLabel", value=input_definition[1])
+		self.indigoDevice.updateStateOnServer(key="currentInputNumber", value=input_definition[0])
+		self.indigoDevice.updateStateOnServer(key="currentInputLabel", value=input_definition[1])
 		self.host_plugin.logger.debug(f"Updating current input number/label: {input_definition[0]} / {input_definition[1]}")
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -210,8 +210,8 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
-		self.indigo_device.updateStateOnServer(key="zone2InputNumber", value=input_definition[0])
-		self.indigo_device.updateStateOnServer(key="zone2InputLabel", value=input_definition[1])
+		self.indigoDevice.updateStateOnServer(key="zone2InputNumber", value=input_definition[0])
+		self.indigoDevice.updateStateOnServer(key="zone2InputLabel", value=input_definition[1])
 		self.host_plugin.logger.debug(f"Updating zone 2 input number/label: {input_definition[0]} / {input_definition[1]}")
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -227,10 +227,10 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 			# update the volume of the virtual controller if it is different than the master...
 			if volume_controller.indigo_device.states.get("brightnessLevel", 0) != self.indigoDevice.states.get("masterVolumeLevel", 0):
 				self.host_plugin.logger.debug(f"Setting Master Volume Virtual Controller brightness to {self.indigoDevice.states.get('masterVolumeLevel', 0)}")
-				volume_controller.indigo_device.updateStateOnServer(key="brightnessLevel", value=self.indigo_device.states.get("masterVolumeLevel", 0))
+				volume_controller.indigo_device.updateStateOnServer(key="brightnessLevel", value=self.indigoDevice.states.get("masterVolumeLevel", 0))
 
 			# determine the on/off state for the controller
-			is_on = self.indigo_device.states.get("isPoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("masterVolumeLevel", 0) > 0
+			is_on = self.indigoDevice.states.get("isPoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("masterVolumeLevel", 0) > 0
 			if volume_controller.indigo_device.states.get("onOffState", False) != is_on:
 				self.host_plugin.logger.debug(f"Setting On/Off state to: {is_on}")
 				volume_controller.indigo_device.updateStateOnServer(key="onOffState", value=is_on)
@@ -246,12 +246,12 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 			volume_controller.reload_indigo_device()
 			
 			# update the volume of the virtual controller if it is different than the master...
-			if volume_controller.indigo_device.states.get("brightnessLevel", 0) != self.indigo_device.states.get("zone2VolumeLevel", 0):
+			if volume_controller.indigo_device.states.get("brightnessLevel", 0) != self.indigoDevice.states.get("zone2VolumeLevel", 0):
 				self.host_plugin.logger.debug(f"Setting Zone 2 Volume Virtual Controller brightness to {self.indigoDevice.states.get('zone2VolumeLevel', 0)}")
-				volume_controller.indigo_device.updateStateOnServer(key="brightnessLevel", value=self.indigo_device.states.get("zone2VolumeLevel", 0))
+				volume_controller.indigo_device.updateStateOnServer(key="brightnessLevel", value=self.indigoDevice.states.get("zone2VolumeLevel", 0))
 
 			# determine the on/off state for the controller
-			is_on = self.indigo_device.states.get("zone2PoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("zone2VolumeLevel", 0) > 0
+			is_on = self.indigoDevice.states.get("zone2PoweredOn", False) == True and self.indigoDevice.states.get("isMuted", True) == False and self.indigoDevice.states.get("zone2VolumeLevel", 0) > 0
 			if volume_controller.indigo_device.states.get("onOffState", False) != is_on:
 				self.hostPlugin.logger.debug(f"Setting On/Off state to: {is_on}")
 				volume_controller.indigo_device.updateStateOnServer(key="onOffState", value=is_on)
