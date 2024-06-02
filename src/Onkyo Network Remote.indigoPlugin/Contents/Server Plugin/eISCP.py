@@ -172,7 +172,7 @@ class eISCPPacket(object):
         # not support variable length strings,
         header = struct.pack(
             '! 4s I I b 3b',
-            'ISCP',             # magic
+            b'ISCP',             # magic
             16,                 # header size (16 bytes)
             len(iscp_message),  # data size
             0x01,               # version
@@ -221,7 +221,7 @@ def command_to_packet(command):
     """Convert an ascii command like (PVR00) to the binary data we
     need to send to the receiver.
     """
-    return str(eISCPPacket(ISCPMessage(command)))
+    return str(eISCPPacket(ISCPMessage(command))).encode('ascii')
 
 
 def normalize_command(command):

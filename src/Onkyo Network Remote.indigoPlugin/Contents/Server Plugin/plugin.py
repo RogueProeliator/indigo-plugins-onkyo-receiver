@@ -2,35 +2,31 @@
 # -*- coding: utf-8 -*-
 #######################################################################################
 # Onkyo Network Remote Control by RogueProeliator <rp@rogueproeliator.com>
-# 	Indigo plugin designed to allow full control of Onkyo Receivers via their network
-#	interface
-#	
-#	Command structure based on the eISCP messages; commands and some code may be found
-#	in the open source project on GitHub:
-#	https://github.com/miracle2k/onkyo-eiscp
+# Indigo plugin designed to allow full control of Onkyo Receivers via their network
+# interface
 #
+# Command structure based on the eISCP messages; commands and some code may be found
+# in the open source project on GitHub:
+# https://github.com/miracle2k/onkyo-eiscp
 #######################################################################################
 
 # region Python imports
 import operator
-import re
-import socket
-import string
 
 from RPFramework.RPFrameworkPlugin import RPFrameworkPlugin
 import onkyoNetworkRemoteDevice
 import eISCP
-#endregion
+# endregion
 
 
 class Plugin(RPFrameworkPlugin):
 
 	#######################################################################################
 	# region Class construction and destruction methods
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# Constructor called once upon plugin class creation; setup the device tracking
 	# variables for later use
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, plugin_id, plugin_display_name, plugin_version, plugin_prefs):
 		# RP framework base class's init method
 		super().__init__(plugin_id, plugin_display_name, plugin_version, plugin_prefs, managed_device_class_module=onkyoNetworkRemoteDevice)
@@ -40,45 +36,45 @@ class Plugin(RPFrameworkPlugin):
 
 	#######################################################################################
 	# region Actions object callback handlers/routines
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called in order to determine which state should be shown in the
 	# "State" column on the Indigo devices list
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getDeviceDisplayStateId(self, dev):
 		# this comes from the user's selection, stored in the device properties
 		state_id = dev.pluginProps.get("stateDisplayColumnState", "connectionState")
 		self.logger.debug(f"Returning state for State column: {state_id}")
 		return state_id
 	
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called by the device configuration dialog in order to get the
 	# menu of available Onkyo devices
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def discover_onkyo_devices(self, filter="", valuesDict=None, typeId="", targetId=0):
 		found_receivers = []
 		for receiver in eISCP.eISCP.discover(timeout=1):
 			found_receivers.append((f"{receiver.host}:{receiver.port}", f"{receiver.info['model_name']}:{receiver.host}"))
 		return found_receivers
 	
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called whenever the user has clicked to use the selected onkyo
 	# from the menu of discovered devices
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def select_enumerated_onkyo_for_use(self, valuesDict=None, filter="", typeId="", targetId=0):
 		selected_device_info = valuesDict.get("onkyoReceiversFound", "")
 		if selected_device_info != "":
-			addressInfo = selected_device_info.split(":")
-			valuesDict["ipAddress"]  = addressInfo[0]
-			valuesDict["portNumber"] = addressInfo[1]
+			address_info = selected_device_info.split(":")
+			valuesDict["ipAddress"]  = address_info[0]
+			valuesDict["portNumber"] = address_info[1]
 		return valuesDict
 	
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called by the action configuration dialog to get the menu of zonesAvailable
 	# available for the device
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def get_zone_selector_menu(self, filter="", valuesDict=None, typeId="", targetId=0):
 		zones_available = []
-		rp_device = self.managedDevices[targetId]
+		rp_device = self.managed_devices[targetId]
 		for zone in rp_device.indigoDevice.pluginProps.get("deviceZonesConnected"):
 			zone_value = zone
 			if zone_value == "main":
@@ -88,10 +84,10 @@ class Plugin(RPFrameworkPlugin):
 			zones_available.append((zone_value, zone_text))
 		return zones_available
 		
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called by the action configuration dialog to retrieve either the
 	# list of all inputs ("all" or None for filter) or only the connected inputs
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def get_input_selector_menu(self, filter="", valuesDict=None, typeId="", target_id=0):
 		self.logger.threaddebug(f"get_input_selector_menu called for filter: {filter}")
 	
@@ -111,10 +107,10 @@ class Plugin(RPFrameworkPlugin):
 			
 		return inputs_available
 		
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will be called from the user executing the menu item action to send
 	# an arbitrary command code to the Onkyo receiver
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def send_arbitrary_command(self, valuesDict, typeId):
 		try:
 			device_id = valuesDict.get("targetDevice", "0")
