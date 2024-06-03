@@ -15,7 +15,7 @@ import operator
 
 from RPFramework.RPFrameworkPlugin import RPFrameworkPlugin
 import onkyoNetworkRemoteDevice
-import eISCP
+import eiscp
 # endregion
 
 
@@ -52,8 +52,9 @@ class Plugin(RPFrameworkPlugin):
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def discover_onkyo_devices(self, filter="", valuesDict=None, typeId="", targetId=0):
 		found_receivers = []
-		for receiver in eISCP.eISCP.discover(timeout=1):
-			found_receivers.append((f"{receiver.host}:{receiver.port}", f"{receiver.info['model_name']}:{receiver.host}"))
+		for receiver in eiscp.eISCP.discover(timeout=3):
+			found_receivers.append((f"{receiver.info['identifier']}:{receiver.iscp_port}", f"{receiver.info['model_name']}:{receiver.info['identifier']}"))
+
 		return found_receivers
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

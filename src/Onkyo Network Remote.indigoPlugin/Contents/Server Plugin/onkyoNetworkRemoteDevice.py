@@ -6,16 +6,14 @@
 
 # region Python imports
 import re
-import sys
 import select
-import threading
 import time
 
 import indigo
 from RPFramework.RPFrameworkTelnetDevice import RPFrameworkTelnetDevice
 from RPFramework.RPFrameworkNonCommChildDevice import RPFrameworkNonCommChildDevice
 from RPFramework.RPFrameworkCommand import RPFrameworkCommand
-import eISCP
+import eiscp
 # endregion
 
 #######################################################################################
@@ -103,6 +101,8 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 			"31" : "XM",
 			"32" : "SIRIUS",
 			"40" : "Universal PORT" }
+
+		self.onkyo_receiver = None
 		
 		# record the new states that have been added so that the device will automatically reload the
 		# state list from the Devices.xml
@@ -122,62 +122,181 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	#######################################################################################
 	# region Processing and command functions
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine should be overridden in individual device classes whenever they must
-	# handle custom commands that are not already defined
+	# This routine is designed to run in a concurrent thread and will continuously monitor
+	# the commands queue for work to do.
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def handle_unmanaged_command_in_queue(self, ip_connection, rp_command):
-		if rp_command.command_name == CMD_SEND_EISCP:
-			self.host_plugin.logger.debug(f"Sending eISCP Command: {rp_command.command_payload}")
-			ip_connection.send(eISCP.command_to_packet(rp_command.command_payload))
-			self.host_plugin.logger.threaddebug("Send command completed.")
-		elif rp_command.command_name == CMD_DIRECT_TUNE or rp_command.command_name == CMD_DIRECT_TUNE_ZONE2:
-			self.host_plugin.logger.debug(f"Received direct tune action to {rp_command.command_payload}")
-			if "." in rp_command.command_payload:
-				# this is an FM station, pad to 2 digits to right of decimal, others to left
-				fm_station_info = rp_command.command_payload.split(".")
-				tune_to_station = fm_station_info[0].rjust(3, "0") + fm_station_info[1].ljust(2, "0")
-			else:
-				# this is an AM or SR station, do all padding to the left
-				tune_to_station = rp_command.command_payload.rjust(5, "0")
-				
-			tune_command_prefix = "TUN"
-			if rp_command.command_name == CMD_DIRECT_TUNE_ZONE2:
-				tune_command_prefix = "TUZ"
-				
-			self.host_plugin.logger.debug(f"Sending tune command for {tune_to_station}")
-			ip_connection.send(eISCP.command_to_packet(tune_command_prefix + tune_to_station))
-	
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine should attempt to read a line of text from the connection, using the
-	# provided timeout as the upper-limit to wait
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def read_line(self, connection, line_ending_token, command_response_timeout):
-		eiscp_data = select.select([connection], [], [], command_response_timeout)
-		if eiscp_data[0]:
-			header_bytes = connection.recv(16)
-			header       = eISCP.eISCPPacket.parse_header(header_bytes)
-			message      = connection.recv(header.data_size)
-			try:
-				return f"{eISCP.iscp_to_command(eISCP.ISCPMessage.parse(message))}"
-			except:
-				self.host_plugin.logger.debug(f"Failed to parse eISCP message, message ignored: {message}")
-				return message
-		else:
-			return ""
-			
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine should attempt to read a line of text from the connection only if there
-	# is an indication of waiting data (there is no waiting until a specified timeout)
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def read_if_available(self, connection, line_ending_token, command_response_timeout):
-		return self.read_line(connection, line_ending_token, command_response_timeout)
+	def concurrent_command_processing_thread(self, command_queue):
+		try:
+			self.host_plugin.logger.debug(f"Concurrent Processing Thread started for device {self.indigoDevice.id}")
+			# retrieve the keys and settings that will be used during the command processing
+			# for this telnet device
+			is_connected_state_key = self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_ISCONNECTEDSTATEKEY, "")
+			connection_state_key   = self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_CONNECTIONSTATEKEY, "")
+			self.host_plugin.logger.threaddebug(f"Read device state config... isConnected: {is_connected_state_key}; connectionState: {connection_state_key}")
+			telnet_connection_info = self.get_device_address_info()
 
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine should return a tuple of information about the connection - in the
-	# format of (ipAddress/HostName, portNumber)
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def get_device_address_info(self):
-		return self.indigoDevice.pluginProps.get("ipAddress", ""), int(self.indigoDevice.pluginProps.get("portNumber", "60128"))
+			# start with a clean slate if this is the first time we are attempting connection
+			if self.failed_connection_attempts == 0:
+				self.indigoDevice.setErrorStateOnServer(None)
+				if is_connected_state_key != "":
+					self.indigoDevice.updateStateOnServer(key=is_connected_state_key, value="false")
+				if connection_state_key != "":
+					self.indigoDevice.updateStateOnServer(key=connection_state_key, value="Not Connected")
+
+			# retrieve any configuration information that may have been set up in the
+			# plugin configuration and/or device configuration
+			command_response_timeout           = float(self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_COMMANDREADTIMEOUT, "0.5"))
+			update_status_poller_property_name = self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_STATUSPOLL_INTERVALPROPERTY, "updateInterval")
+			update_status_poller_interval      = int(self.indigoDevice.pluginProps.get(update_status_poller_property_name, "90"))
+			update_status_poller_next_run      = None
+			update_status_poller_action_id     = self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_STATUSPOLL_ACTIONID, "")
+			update_status_poller_initial_delay = float(self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_STATUSPOLL_INITIALDELAY, "0.5"))
+			empty_queue_reduced_wait_cycles    = int(self.host_plugin.get_gui_config_value(self.indigoDevice.deviceTypeId, RPFrameworkTelnetDevice.GUI_CONFIG_TELNETDEV_EMPTYQUEUE_SPEEDUPCYCLES, "200"))
+
+			# begin the infinite loop which will run as long as the queue contains commands
+			# and we have not received an explicit shutdown request
+			continue_processing_commands = True
+			last_queued_command_completed = 0
+			while continue_processing_commands:
+				# process pending commands now...
+				while not command_queue.empty():
+					len_queue = command_queue.qsize()
+					self.host_plugin.logger.threaddebug(f"Command queue has {len_queue} command(s) waiting")
+
+					# the command name will identify what action should be taken... we will handle the known
+					# commands and dispatch out to the device implementation, if necessary, to handle unknown
+					# commands
+					command = command_queue.get()
+					if command.command_name == RPFrameworkCommand.CMD_INITIALIZE_CONNECTION:
+						# specialized command to instantiate the thread/telnet connection
+						self.host_plugin.logger.threaddebug("Create connection command de-queued")
+
+						# establish the telnet connection to the telnet-based which handles the primary
+						# network remote operations
+						self.host_plugin.logger.debug(f"Establishing connection to {telnet_connection_info[0]}")
+						self.onkyo_receiver = eiscp.eISCP(telnet_connection_info[0])
+						self.failed_connection_attempts = 0
+						self.host_plugin.logger.debug("Connection established")
+
+						self.indigoDevice.setErrorStateOnServer(None)
+						if is_connected_state_key != "":
+							self.indigoDevice.updateStateOnServer(key=is_connected_state_key, value="true")
+						if connection_state_key != "":
+							self.indigoDevice.updateStateOnServer(key=connection_state_key, value="Connected")
+
+						# if the device supports polling for status, it may be initiated here now that
+						# the connection has been established; no additional command will come through
+						self.host_plugin.logger.threaddebug("Scheduling status update")
+						command.post_command_pause = update_status_poller_initial_delay
+						command_queue.put(RPFrameworkCommand(RPFrameworkCommand.CMD_UPDATE_DEVICE_STATUS_FULL, parent_action=update_status_poller_action_id))
+
+					elif command.command_name == RPFrameworkCommand.CMD_TERMINATE_PROCESSING_THREAD:
+						# a specialized command designed to stop the processing thread indigo
+						# the event of a shutdown
+						continue_processing_commands = False
+
+					elif command.command_name == RPFrameworkCommand.CMD_PAUSE_PROCESSING:
+						# the amount of time to sleep should be a float found in the
+						# payload of the command
+						try:
+							pause_time = float(command.command_payload)
+							self.host_plugin.logger.threaddebug(f"Initiating sleep of {pause_time} seconds from command.")
+							time.sleep(pause_time)
+						except:
+							self.host_plugin.logger.error("Invalid pause time requested")
+
+					elif command.command_name == RPFrameworkCommand.CMD_UPDATE_DEVICE_STATUS_FULL:
+						# this command instructs the plugin to update the full status of the device (all statuses
+						# that may be read from the device should be read)
+						if update_status_poller_action_id != "":
+							self.host_plugin.logger.debug("Executing full status update request...")
+							self.host_plugin.execute_action(None, indigoActionId=update_status_poller_action_id, indigoDeviceId=self.indigoDevice.id, paramValues=None)
+							if update_status_poller_interval > 0:
+								update_status_poller_next_run = time.time() + update_status_poller_interval
+						else:
+							self.host_plugin.logger.threaddebug("Ignoring status update request, no action specified to update device status")
+
+					elif command.command_name == RPFrameworkCommand.CMD_UPDATE_DEVICE_STATE:
+						# this command is to update a device state with the payload (which may be an
+						# eval command)
+						new_state_info = re.match(r'^\{ds\:([a-zA-Z\d]+)\}\{(.+)\}$', command.command_payload, re.I)
+						if new_state_info is None:
+							self.host_plugin.logger.error(f"Invalid new device state specified")
+						else:
+							# the new device state may include an eval statement...
+							update_state_name = new_state_info.group(1)
+							update_state_value = new_state_info.group(2)
+							if update_state_value.startswith("eval"):
+								update_state_value = eval(update_state_value.replace("eval:", ""))
+
+							self.host_plugin.logger.debug(
+								f"Updating state '{update_state_name}' to: '{update_state_value}'")
+							self.indigoDevice.updateStateOnServer(key=update_state_name, value=update_state_value)
+
+					elif command.command_name == CMD_SEND_EISCP:
+						# this command initiates a write of data to the device
+						self.host_plugin.logger.debug(f"Sending command: {command.command_payload}")
+						# determine if any response has been received from the telnet device...
+						response_text = self.onkyo_receiver.raw(command.command_payload)
+						if response_text != "":
+							self.host_plugin.logger.threaddebug(f"Received: {response_text}")
+							self.handle_device_response(response_text, command)
+						self.host_plugin.logger.threaddebug("Write command completed.")
+
+					elif command.command_name == CMD_DIRECT_TUNE or command.command_name == CMD_DIRECT_TUNE_ZONE2:
+						self.host_plugin.logger.debug(f"Received direct tune action to {command.command_payload}")
+						if "." in command.command_payload:
+							# this is an FM station, pad to 2 digits to right of decimal, others to left
+							fm_station_info = command.command_payload.split(".")
+							tune_to_station = fm_station_info[0].rjust(3, "0") + fm_station_info[1].ljust(2, "0")
+						else:
+							# this is an AM or SR station, do all padding to the left
+							tune_to_station = command.command_payload.rjust(5, "0")
+
+						tune_command_prefix = "TUN"
+						if command.command_name == CMD_DIRECT_TUNE_ZONE2:
+							tune_command_prefix = "TUZ"
+
+						self.host_plugin.logger.debug(f"Sending tune command for {tune_to_station}")
+						response_text = self.onkyo_receiver.raw(tune_command_prefix + tune_to_station)
+						if response_text != "":
+							self.host_plugin.logger.threaddebug(f"Received: {response_text}")
+							self.handle_device_response(response_text, command)
+
+					# if the command has a pause defined for after it is completed then we
+					# should execute that pause now
+					if command.post_command_pause > 0.0 and continue_processing_commands:
+						self.host_plugin.logger.threaddebug(f"Post Command Pause: {command.post_command_pause}")
+						time.sleep(command.post_command_pause)
+
+					# complete the de-queuing of the command, allowing the next
+					# command in queue to rise to the top
+					command_queue.task_done()
+					last_queued_command_completed = empty_queue_reduced_wait_cycles
+
+				# continue with empty-queue processing unless the connection is shutting down...
+				if continue_processing_commands:
+					# when the queue is empty, pause a bit on each iteration
+					if last_queued_command_completed > 0:
+						time.sleep(self.empty_queue_sleep_time / 2)
+						last_queued_command_completed = last_queued_command_completed - 1
+					else:
+						time.sleep(self.empty_queue_sleep_time)
+
+					# check to see if we need to issue an update...
+					if update_status_poller_next_run is not None and time.time() > update_status_poller_next_run:
+						command_queue.put(RPFrameworkCommand(RPFrameworkCommand.CMD_UPDATE_DEVICE_STATUS_FULL, parent_action=update_status_poller_action_id))
+
+		# handle any exceptions that are thrown during execution of the plugin... note that this
+		# should terminate the thread, but it may get spun back up again
+		except SystemExit:
+			pass
+		except Exception:
+			self.host_plugin.logger.exception("Exception in background processing")
+		except:
+			self.host_plugin.logger.exception("Exception in background processing")
+		finally:
+			self.host_plugin.logger.debug("Command thread ending processing")
 
 	# endregion
 	#######################################################################################
@@ -259,21 +378,6 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# endregion
 	#######################################################################################
 	
-	#######################################################################################
-	# region Utility routines
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine will parse the return from an eISCP input query to the equivalent
-	# "human-readable" form. Return is tuple - ("input#", "Description")
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def parse_eiscp_input_definition(self, eiscp_input_defn):
-		# attempt to find both the input number and name from our lookup tables
-		input_number = self.inputSelectorEISCPMappings.get(eiscp_input_defn, "")
-		input_desc   = self.inputChannelToDescription.get(input_number, "")
-		return input_number, input_desc
-
-	# endregion
-	#######################################################################################
-
 
 class OnkyoVirtualVolumeController(RPFrameworkNonCommChildDevice):
 	
