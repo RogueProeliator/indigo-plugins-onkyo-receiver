@@ -298,6 +298,13 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 		finally:
 			self.host_plugin.logger.debug("Command thread ending processing")
 
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine should return a tuple of information about the connection - in the
+	# format of (ipAddress/HostName, portNumber)
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def get_device_address_info(self):
+		return self.indigoDevice.pluginProps.get("ipAddress", ""), int(self.indigoDevice.pluginProps.get("portNumber", "60128"))
+
 	# endregion
 	#######################################################################################
 		
