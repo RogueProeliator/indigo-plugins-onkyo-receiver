@@ -21,6 +21,7 @@ import eiscp
 CMD_SEND_EISCP        = "sendEISCPCommand"
 CMD_DIRECT_TUNE       = "directTune"
 CMD_DIRECT_TUNE_ZONE2 = "directTuneZone2"
+CMD_PROCESS_MESSAGE   = "processMessage"
 # endregion
 #######################################################################################
 
@@ -174,7 +175,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 						# establish the telnet connection to the telnet-based which handles the primary
 						# network remote operations
 						self.host_plugin.logger.debug(f"Establishing connection to {telnet_connection_info[0]}")
-						self.onkyo_receiver = eiscp.eISCP(telnet_connection_info[0])
+						self.onkyo_receiver = eiscp.Receiver(telnet_connection_info[0])
 						self.failed_connection_attempts = 0
 						self.host_plugin.logger.debug("Connection established")
 
@@ -236,11 +237,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 					elif command.command_name == CMD_SEND_EISCP:
 						# this command initiates a write of data to the device
 						self.host_plugin.logger.debug(f"Sending command: {command.command_payload}")
-						# determine if any response has been received from the telnet device...
-						response_text = self.onkyo_receiver.raw(command.command_payload)
-						if response_text != "":
-							self.host_plugin.logger.threaddebug(f"Received: {response_text}")
-							self.handle_device_response(response_text, command)
+						self.onkyo_receiver.send(command.command_payload)
 						self.host_plugin.logger.threaddebug("Write command completed.")
 
 					elif command.command_name == CMD_DIRECT_TUNE or command.command_name == CMD_DIRECT_TUNE_ZONE2:
@@ -258,9 +255,12 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 							tune_command_prefix = "TUZ"
 
 						self.host_plugin.logger.debug(f"Sending tune command for {tune_to_station}")
-						response_text = self.onkyo_receiver.raw(tune_command_prefix + tune_to_station)
+						self.onkyo_receiver.send(tune_command_prefix + tune_to_station)
+
+					elif command.command_name == CMD_PROCESS_MESSAGE:
+						response_text = command.command_payload
 						if response_text != "":
-							self.host_plugin.logger.threaddebug(f"Received: {response_text}")
+							self.host_plugin.logger.threaddebug(f"Processing Message: {response_text}")
 							self.handle_device_response(response_text, command)
 
 					# if the command has a pause defined for after it is completed then we
@@ -304,6 +304,14 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def get_device_address_info(self):
 		return self.indigoDevice.pluginProps.get("ipAddress", ""), int(self.indigoDevice.pluginProps.get("portNumber", "60128"))
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# Called whenever the Onkyo device has sent a message to the socket... this needs to
+	# queue the message up for processing, not process it in a blocking manner
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def onkyo_message_received(self, message):
+		self.host_plugin.logger.threaddebug(f"Received: {message}")
+		self.queue_device_command(RPFrameworkCommand(CMD_PROCESS_MESSAGE, command_payload=message))
 
 	# endregion
 	#######################################################################################
