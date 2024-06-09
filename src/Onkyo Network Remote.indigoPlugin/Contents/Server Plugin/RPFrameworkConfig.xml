@@ -52,12 +52,12 @@
 				<deviceResponses>
 					<response id="devicePowerQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)]]></matchExpression>
+						<matchExpression><![CDATA[PWR(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>isPoweredOn</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
-								<updateValueExFormat><![CDATA["On" if re.match("\('system\-power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on" else "Standby"]]></updateValueExFormat>
+								<updateValueFormat><![CDATA[re.match("PWR(?P<value>\d{2})", "%cp:response%").groupdict().get("value") == "01"]]></updateValueFormat>
+								<updateValueExFormat><![CDATA["On" if re.match("PWR(?P<value>\d{2})", "%cp:response%").groupdict().get("value") == "01" else "Standby"]]></updateValueExFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>update_virtual_master_volume</updateParam>
@@ -67,33 +67,33 @@
 					</response>
 					<response id="zonePowerQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)]]></matchExpression>
+						<matchExpression><![CDATA[ZPW(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>zone2PoweredOn</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
-								<updateValueExFormat><![CDATA["On" if re.match("\('power',\s{0,1}'(?P<value>(on)|(off)|(standby))'\)", "%cp:response%").groupdict().get("value") == "on" else "Standby"]]></updateValueExFormat>
+								<updateValueFormat><![CDATA[re.match("ZPW(?P<value>\d{2})", "%cp:response%").groupdict().get("value") == "01"]]></updateValueFormat>
+								<updateValueExFormat><![CDATA["On" if re.match("ZPW(?P<value>\d{2})", "%cp:response%").groupdict().get("value") == "01" else "Standby"]]></updateValueExFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="deviceSleepTimerQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('sleep\-set',\s{0,1}'(?P<value>[A-F\d]+)'\)]]></matchExpression>
+						<matchExpression><![CDATA[SLP(?P<value>[A-F\d]+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>sleepTimer</updateParam>
-								<updateValueFormat><![CDATA[int(re.match("\('sleep\-set',\s{0,1}'(?P<value>[A-F\d]+)'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+								<updateValueFormat><![CDATA["0" if re.match("SLP(?P<value>[A-F\d]+)", "%cp:response%").groupdict().get("value") == "OFF" else int(re.match("SLP(?P<value>[A-F\d]+)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					
 					<response id="deviceMasterVolumeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\(\('master\-volume',\s*\'volume\'\),\s*\'{0,1}(?P<value>[A-F\d]+)\'{0,1}\)]]></matchExpression>
+						<matchExpression><![CDATA[MVL(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>masterVolumeLevel</updateParam>
-								<updateValueFormat><![CDATA[int(re.match("^\(\('master\-volume',\s*\'volume\'\),\s*\'{0,1}(?P<value>[A-F\d]+)\'{0,1}\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+								<updateValueFormat><![CDATA[int(re.match("MVL(?P<value>\d{2})", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>update_virtual_master_volume</updateParam>
@@ -103,11 +103,11 @@
 					</response>
 					<response id="deviceZoneVolumeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('volume',\s{0,1}'(?P<value>[A-F\d]+)'\)]]></matchExpression>
+						<matchExpression><![CDATA[ZVL(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>zone2VolumeLevel</updateParam>
-								<updateValueFormat><![CDATA[int(re.match("^\('volume',\s{0,1}'(?P<value>[A-F\d]+)'\)", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+								<updateValueFormat><![CDATA[int(re.match("ZVL(?P<value>\d{2})", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>update_virtual_zone2_volume</updateParam>
@@ -131,11 +131,11 @@
 					</response>
 					<response id="deviceIsMutedQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('audio\-muting',\s{0,1}'(?P<value>(on)|(off))'\)]]></matchExpression>
+						<matchExpression><![CDATA[AMT(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>isMuted</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('audio\-muting',\s{0,1}'(?P<value>(on)|(off))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("AMT(?P<value>\d{2})", "%cp:response%").groupdict().get("value") == "01"]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>update_virtual_master_volume</updateParam>
@@ -145,28 +145,28 @@
 					</response>
 					<response id="deviceHDMIAudioOutQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('hdmi\-audio\-out',\s{0,1}'(?P<value>(on)|(off))'\)]]></matchExpression>
+						<matchExpression><![CDATA[HAO(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>hdmiAudioOut</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('hdmi\-audio\-out',\s{0,1}'(?P<value>(on)|(off))'\)", "%cp:response%").groupdict().get("value") != "off"]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("HAO(?P<value>\d{2})", "%cp:response%").groupdict().get("value") != "00"]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="listeningModeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\('listening\-mode',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<matchExpression><![CDATA[LMD(?P<value>([\dA-Z]+)]]></matchExpression>
 						<effects>
-							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
-								<updateParam>listeningMode</updateParam>
-								<updateValueFormat><![CDATA[re.match("^\('listening\-mode',\s{0,1}(?P<value>('|\().+('|\)))\)$", "%cp:response%").groupdict().get("value").replace("'", "").replace("(", "").replace(")", "")]]></updateValueFormat>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="true">
+								<updateParam>listening_mode_response_received</updateParam>
+								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					
 					<response id="deviceInputSelectorQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$]]></matchExpression>
+						<matchExpression><![CDATA[SLI(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
 								<updateParam>input_selector_query_received</updateParam>
@@ -176,7 +176,7 @@
 					</response>
 					<response id="zone2InputSelectorQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<matchExpression><![CDATA[SLZ(?P<value>\d{2})]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
 								<updateParam>zone2_selector_query_received</updateParam>
@@ -186,53 +186,63 @@
 					</response>
 					<response id="tunerFrequencyQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('tuning',\s{0,1}'(?P<value>[\d\.]+)'\)]]></matchExpression>
+						<matchExpression><![CDATA[TUN(?P<value>[\d\.]+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>tunerFrequency</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('tuning',\s{0,1}'(?P<value>[\d\.]+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("TUN(?P<value>[\d\.]+)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					
 					<response id="currentVideoOutResQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[^\('monitor\-out\-resolution',\s{0,1}(?P<value>('|\().+('|\)))\)$]]></matchExpression>
+						<matchExpression><![CDATA[RES(?P<value>\d{2})]]></matchExpression>
 						<effects>
-							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
-								<updateParam>videoOutputResolution</updateParam>
-								<updateValueFormat><![CDATA[re.match("^\('monitor\-out\-resolution',\s{0,1}(?P<value>('|\().+('|\)))\)$", "%cp:response%").groupdict().get("value").replace("'", "")]]></updateValueFormat>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="true">
+								<updateParam>video_resolution_response_received</updateParam>
+								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="videoWideScreenModeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('video\-wide\-mode',\s{0,1}'(?P<value>[a-zA-Z\d\-]*)'\)]]></matchExpression>
+						<matchExpression><![CDATA[VWM(?P<value>\d{2})]]></matchExpression>
 						<effects>
-							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
-								<updateParam>videoWideScreenMode</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('video\-wide\-mode',\s{0,1}'(?P<value>[a-zA-Z\d\-]*)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="true">
+								<updateParam>video_widescreen_mode_response_received</updateParam>
+								<updateValueFormat></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+					<response id="videoPictureModeQuery" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[VPM(?P<value>\d{2})]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="true">
+								<updateParam>video_picture_mode_response_received</updateParam>
+								<updateValueFormat></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					
 					<response id="speakerAStatusQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('speaker\-a',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)]]></matchExpression>
+						<matchExpression><![CDATA[SPA(?P<value>(00)|(01)|(N/A))]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>speakerAPower</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('speaker\-a',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("SPA(?P<value>(00)|(01)|(N/A))", "%cp:response%").groupdict().get("value") == "01"]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="speakerBStatusQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('speaker\-b',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)]]></matchExpression>
+						<matchExpression><![CDATA[SPB(?P<value>(00)|(01)|(N/A))]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>speakerBPower</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('speaker\-b',\s{0,1}'(?P<value>(on)|(off)|(N/A))'\)", "%cp:response%").groupdict().get("value") == "on"]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("SPB(?P<value>(00)|(01)|(N/A))", "%cp:response%").groupdict().get("value") == "01"]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
@@ -240,41 +250,41 @@
 					<!-- network and streaming responses -->
 					<response id="streamingArtistQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('net\-usb\-artist\-name\-info',\s{0,1}'(?P<value>.+)'\)]]></matchExpression>
+						<matchExpression><![CDATA[NAT(?P<value>.+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>networkPlayArtist</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('net\-usb\-artist\-name\-info',\s{0,1}'(?P<value>.+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("NAT(?P<value>.+)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="streamingAlbumQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('net\-usb\-album\-name\-info',\s{0,1}'(?P<value>.+)'\)]]></matchExpression>
+						<matchExpression><![CDATA[NAL(?P<value>.+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>networkPlayAlbum</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('net\-usb\-album\-name\-info',\s{0,1}'(?P<value>.+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("NAL(?P<value>.+)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="streamingTitleQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('net\-usb\-title\-name',\s{0,1}'(?P<value>.+)'\)]]></matchExpression>
+						<matchExpression><![CDATA[NTI(?P<value>.+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>networkPlayTitle</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('net\-usb\-title\-name',\s{0,1}'(?P<value>.+)'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+								<updateValueFormat><![CDATA[re.match("NTI(?P<value>.+)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
 					<response id="streamingTitleStatus" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('net\-usb\-play\-status',\s{0,1}'(?P<value>.{3})'\)]]></matchExpression>
+						<matchExpression><![CDATA[NST(?P<value>.+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>networkPlayStatus</updateParam>
-								<updateValueFormat><![CDATA[re.match("\('net\-usb\-play\-status',\s{0,1}'(?P<value>.{3})'\)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
+								<updateValueFormat><![CDATA[NST(?P<value>.+)", "%cp:response%").groupdict().get("value")]]></updateValueFormat>
 							</effect>
 						</effects>
 					</response>
@@ -357,11 +367,7 @@
 						<commandName>sendEISCPCommand</commandName>
 						<commandFormat><![CDATA[LMDQSTN]]></commandFormat>
 					</command>
-					
-					<command>
-						<commandName>sendEISCPCommand</commandName>
-						<commandFormat><![CDATA[SLAQSTN]]></commandFormat>
-					</command>
+
 					<command>
 						<commandName>sendEISCPCommand</commandName>
 						<commandFormat><![CDATA[TUNQSTN]]></commandFormat>

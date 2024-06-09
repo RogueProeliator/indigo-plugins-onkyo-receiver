@@ -6,7 +6,6 @@
 
 # region Python imports
 import re
-import select
 import time
 
 import indigo
@@ -103,6 +102,113 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 			"32" : "SIRIUS",
 			"40" : "Universal PORT" }
 
+		self.video_resolution_map = {
+			"00" : "Through",
+			"01" : "Auto",
+			"02" : "480p",
+			"03" : "720p",
+			"13" : "1680x720p",
+			"04" : "1080i",
+			"05" : "1080p",
+			"07" : "1080p/24fps",
+			"15" : "2560x1080p",
+			"08" : "4K",
+			"06" : "Source"
+		}
+
+		self.video_widescreenmode_map = {
+			"00" : "Auto",
+			"01" : "4:3",
+			"02" : "Full",
+			"03" : "Zoom",
+			"04" : "Wide Zoom",
+			"05" : "Smart Zoom"
+		}
+
+		self.video_picturemode_map = {
+			"00" : "Through",
+			"01" : "Custom",
+			"02" : "Cinema",
+			"03" : "Game",
+			"05" : "ISF Day",
+			"06" : "ISF Night",
+			"07" : "Streaming",
+			"08" : "Direct Bypass"
+		}
+
+		self.listening_mode_map = {
+			'05': 'action',
+			'0C': 'all-ch-stereo',
+			'16': 'audyssey-dsx',
+			'50': 'cinema2',
+			'01': 'direct',
+			'41': 'dolby-ex',
+			'A7': 'dolby-ex-audyssey-dsx',
+			'14': 'dolby-virtual',
+			'DOWN': 'down',
+			'15': 'dts-surround-sensation',
+			'0E': 'enhance',
+			'03': 'film',
+			'13': 'full-mono',
+			'GAME': 'game',
+			'06': 'game-rock/musical',
+			'52': 'i',
+			'0F': 'mono',
+			'07': 'mono-movie',
+			'MOVIE': 'movie',
+			'12': 'multiplex',
+			'MUSIC': 'music',
+			'8C': 'neo-6',
+			'82': 'neo-6-cinema',
+			'A3': 'neo-6-cinema-audyssey-dsx',
+			'91': 'neo-6-cinema-dts-surround-sensation',
+			'83': 'neo-6-music',
+			'A4': 'neo-6-music-audyssey-dsx',
+			'92': 'neo-6-music-dts-surround-sensation',
+			'9A': 'neo-x-game',
+			'85': 'neo-x-thx-cinema',
+			'8A': 'neo-x-thx-games',
+			'93': 'neural-digital-music',
+			'A6': 'neural-digital-music-audyssey-dsx',
+			'87': 'neural-surr',
+			'88': 'neural-surround/thx',
+			'A5': 'neural-surround-audyssey-dsx',
+			'8D': 'neural-thx-cinema',
+			'8F': 'neural-thx-games',
+			'8E': 'neural-thx-music',
+			'08': 'orchestra',
+			'8B': 'plii',
+			'A2': 'plii-game-audyssey-dsx',
+			'A0': 'plii-movie-audyssey-dsx',
+			'A1': 'plii-music-audyssey-dsx',
+			'86': 'pliix-game',
+			'80': 'pliix-movie',
+			'81': 'pliix-music',
+			'84': 'pliix-thx-cinema',
+			'89': 'pliix-thx-games',
+			'90': 'pliiz-height',
+			'94': 'pliiz-height-thx-cinema',
+			'96': 'pliiz-height-thx-games',
+			'95': 'pliiz-height-thx-music',
+			'99': 's2-games/pliiz-height-thx-u2',
+			'11': 'pure-audio',
+			'51': 's-music',
+			'97': 's2-cinema',
+			'98': 's2-music',
+			'00': 'stereo',
+			'40': 'straight-decode',
+			'0A': 'studio-mix',
+			'02': 'surround',
+			'0D': 'theater-dimensional',
+			'04': 'thx',
+			'42': 'thx-cinema',
+			'44': 'thx-music',
+			'43': 'thx-surround-ex',
+			'0B': 'tv-logic',
+			'09': 'unplugged',
+			'1F': 'whole-house'
+		}
+
 		self.onkyo_receiver = None
 		
 		# record the new states that have been added so that the device will automatically reload the
@@ -175,7 +281,8 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 						# establish the telnet connection to the telnet-based which handles the primary
 						# network remote operations
 						self.host_plugin.logger.debug(f"Establishing connection to {telnet_connection_info[0]}")
-						self.onkyo_receiver = eiscp.Receiver(telnet_connection_info[0])
+						self.onkyo_receiver = eiscp.core.Receiver(telnet_connection_info[0])
+						self.onkyo_receiver.on_message = self.onkyo_message_received
 						self.failed_connection_attempts = 0
 						self.host_plugin.logger.debug("Connection established")
 
@@ -261,7 +368,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 						response_text = command.command_payload
 						if response_text != "":
 							self.host_plugin.logger.threaddebug(f"Processing Message: {response_text}")
-							self.handle_device_response(response_text, command)
+							self.handle_device_response(response_text, None)
 
 					# if the command has a pause defined for after it is completed then we
 					# should execute that pause now
@@ -323,9 +430,9 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# request for the current input for the receiver
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def input_selector_query_received(self, response_obj, rp_command):
-		value_splitter   = re.compile(r"^\('input\-selector',\s{0,1}(?P<value>('|\().+('|\))|\d+)\)$")
+		value_splitter   = re.compile(r"^SLI(?P<value>\d{2})$")
 		value_match      = value_splitter.search(response_obj)
-		input_value      = value_match.groupdict().get("value").replace("'", "")
+		input_value      = value_match.groupdict().get("value")
 		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
@@ -338,7 +445,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# request for the current input for Zone 2 of the receiver
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def zone2_selector_query_received(self, response_obj, rp_command):
-		value_splitter   = re.compile(r"^\('selector',\s{0,1}(?P<value>('|\().+('|\)))\)$")
+		value_splitter   = re.compile(r"SLZ(?P<value>\d{2})")
 		value_match      = value_splitter.search(response_obj)
 		input_value      = value_match.groupdict().get("value").replace("'", "")
 		input_definition = self.parse_eiscp_input_definition(input_value)
@@ -390,9 +497,61 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 				self.host_plugin.logger.debug(f"Setting On/Off state to: {is_on}")
 				volume_controller.indigoDevice.updateStateOnServer(key="onOffState", value=is_on)
 
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This callback will be triggered whenever an update to the Video Out resolution has
+	# been received; this will convert the number to the text equivalent
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def video_resolution_response_received(self, response_obj, rp_command):
+		self.response_to_mapped_value(r"RES(?P<value>\d{2})", response_obj, "videoOutputResolution", self.video_resolution_map)
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This callback will be triggered whenever an update to the Video Widescreen Mode has
+	# been received; this will convert the number to the text equivalent
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def video_widescreen_mode_response_received(self, response_obj, rp_command):
+		self.response_to_mapped_value(r"VWM(?P<value>\d{2})", response_obj, "videoWideScreenMode", self.video_widescreenmode_map)
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This callback will be triggered whenever an update to the Video Picture Mode has
+	# been received; this will convert the number to the text equivalent
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def video_picture_mode_response_received(self, response_obj, rp_command):
+		self.response_to_mapped_value(r"VPM(?P<value>\d{2})", response_obj, "videoPictureMode", self.video_picturemode_map)
+
+	def listening_mode_response_received(self, response_obj, rp_command):
+		self.response_to_mapped_value(r"LMD(?P<value>([\dA-Z]+)", response_obj, "listeningMode", self.listening_mode_map)
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This callback processor performs a standard mapping of a response value to its
+	# description via a dictionary; if value is not found in the map then the raw value
+	# is used as the state
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def response_to_mapped_value(self, parse_expression, response_obj, state_name, value_map):
+		value_splitter = re.compile(parse_expression)
+		value_match = value_splitter.search(response_obj)
+		input_value = value_match.groupdict().get("value")
+		if input_value in value_map:
+			self.indigoDevice.updateStateOnServer(key=state_name, value=value_map[input_value])
+		else:
+			self.indigoDevice.updateStateOnServer(key=state_name, value=input_value)
+
 	# endregion
 	#######################################################################################
-	
+
+	#######################################################################################
+	# region Utility routines
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine will parse the return from an eISCP input query to the equivalent
+	# "human-readable" form. Return is tuple - ("input#", "Description")
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def parse_eiscp_input_definition(self, eiscp_input_defn):
+		# attempt to find both the input number and name from our lookup tables
+		input_number = self.inputSelectorEISCPMappings.get(eiscp_input_defn, "")
+		input_desc = self.inputChannelToDescription.get(input_number, "")
+		return input_number, input_desc
+
+	# endregion
+	#######################################################################################
 
 class OnkyoVirtualVolumeController(RPFrameworkNonCommChildDevice):
 	
