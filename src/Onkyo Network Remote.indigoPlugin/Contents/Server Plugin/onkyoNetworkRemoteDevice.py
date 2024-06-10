@@ -36,41 +36,8 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, plugin, device):
 		super().__init__(plugin, device, connection_type=RPFrameworkTelnetDevice.CONNECTIONTYPE_SOCKET)
-		
-		# create the dictionary that maps input selector values to/from their respective numbers
-		self.inputSelectorEISCPMappings = {
-			"(video1, vcr, dvr)"        : "00",
-			"(video2, cbl, sat)"        : "01",
-			"(video3, game, tv, game)"  : "02",
-			"(video4, aux1)"            : "03",
-			"(video5, aux2)"            : "04",
-			"(video6, pc)"              : "05",
-			"video7"                    : "06",
-			"07"                        : "07",
-			"08"                        : "08",
-			"09"                        : "09",
-			"(dvd, bd, dvd)"            : "10",
-			"11"                        : "11",
-			"18"                        : "12",
-			"(tape-1, tv, tape)"        : "20",
-			"tape2"                     : "21",
-			"phono"                     : "22",
-			"(cd, tv, cd)"              : "23",
-			"fm"                        : "24",
-			"am"                        : "25",
-			"tuner"                     : "26",
-			"(music-server, p4s, dlna)" : "27",
-			"(internet-radio, iradio-favorite)" : "28",
-			"(usb, usb)"                : "29",
-			"usb"                       : "2A",
-			"(network, net)"            : "2B",
-			#"usb"                       : "2C",
-			"multi-ch"                  : "30",
-			"xm"                        : "31",
-			"sirius"                    : "32",
-			"universal-port"            : "40" }
-		
-		self.inputChannelToDescription = {
+
+		self.input_number_to_description = {
 			"00" : "VIDEO1, VCR/DVR",
 			"01" : "VIDEO2, CBL/SAT",
 			"02" : "VIDEO3, GAME/TV, GAME",
@@ -367,7 +334,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 					elif command.command_name == CMD_PROCESS_MESSAGE:
 						response_text = command.command_payload
 						if response_text != "":
-							self.host_plugin.logger.threaddebug(f"Processing Message: {response_text}")
+							self.host_plugin.logger.debug(f"Processing Message: {response_text}")
 							self.handle_device_response(response_text, None)
 
 					# if the command has a pause defined for after it is completed then we
@@ -436,9 +403,9 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
-		self.indigoDevice.updateStateOnServer(key="currentInputNumber", value=input_definition[0])
-		self.indigoDevice.updateStateOnServer(key="currentInputLabel", value=input_definition[1])
-		self.host_plugin.logger.debug(f"Updating current input number/label: {input_definition[0]} / {input_definition[1]}")
+		self.indigoDevice.updateStateOnServer(key="currentInputNumber", value=input_value)
+		self.indigoDevice.updateStateOnServer(key="currentInputLabel", value=input_definition)
+		self.host_plugin.logger.debug(f"Updating current input number/label: {input_value} / {input_definition}")
 		
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback is made whenever the plugin has received the response to a status
@@ -447,13 +414,13 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	def zone2_selector_query_received(self, response_obj, rp_command):
 		value_splitter   = re.compile(r"SLZ(?P<value>\d{2})")
 		value_match      = value_splitter.search(response_obj)
-		input_value      = value_match.groupdict().get("value").replace("'", "")
+		input_value      = value_match.groupdict().get("value")
 		input_definition = self.parse_eiscp_input_definition(input_value)
 		
 		# update the two "current inputs" on the server...
-		self.indigoDevice.updateStateOnServer(key="zone2InputNumber", value=input_definition[0])
-		self.indigoDevice.updateStateOnServer(key="zone2InputLabel", value=input_definition[1])
-		self.host_plugin.logger.debug(f"Updating zone 2 input number/label: {input_definition[0]} / {input_definition[1]}")
+		self.indigoDevice.updateStateOnServer(key="zone2InputNumber", value=input_value)
+		self.indigoDevice.updateStateOnServer(key="zone2InputLabel", value=input_definition)
+		self.host_plugin.logger.debug(f"Updating zone 2 input number/label: {input_value} / {input_definition}")
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback will be triggered whenever an update to the Master Volume has been
@@ -546,9 +513,10 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def parse_eiscp_input_definition(self, eiscp_input_defn):
 		# attempt to find both the input number and name from our lookup tables
-		input_number = self.inputSelectorEISCPMappings.get(eiscp_input_defn, "")
-		input_desc = self.inputChannelToDescription.get(input_number, "")
-		return input_number, input_desc
+		input_desc = self.input_number_to_description.get(eiscp_input_defn, "")
+		if not input_desc:
+			input_desc = f"Input {eiscp_input_defn}"
+		return input_desc
 
 	# endregion
 	#######################################################################################

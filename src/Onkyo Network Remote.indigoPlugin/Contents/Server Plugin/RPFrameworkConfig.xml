@@ -117,7 +117,7 @@
 					</response>
 					<response id="deviceZoneVolumeQueryNA" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[\('volume',\s{0,1}'N/A'\)]]></matchExpression>
+						<matchExpression><![CDATA[SLAN/A]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>zone2VolumeLevel</updateParam>
@@ -155,7 +155,7 @@
 					</response>
 					<response id="listeningModeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[LMD(?P<value>([\dA-Z]+)]]></matchExpression>
+						<matchExpression><![CDATA[LMD(?P<value>[\dA-Z]+)]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="true">
 								<updateParam>listening_mode_response_received</updateParam>

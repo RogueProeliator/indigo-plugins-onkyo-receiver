@@ -98,12 +98,12 @@ class Plugin(RPFrameworkPlugin):
 			rp_device = onkyoNetworkRemoteDevice.OnkyoReceiverNetworkRemoteDevice(self, None)
 		
 		if filter is None or filter == "" or filter == "all":
-			inputs_available = sorted(rp_device.inputChannelToDescription.iteritems(), key=operator.itemgetter(1))
+			inputs_available = sorted(rp_device.input_number_to_description.iteritems(), key=operator.itemgetter(1))
 		else:
 			# we need to get the list of inputs matching the selected/connected list from the device
 			connected_list = []
 			for input_num in rp_device.indigoDevice.pluginProps.get("deviceInputsConnected"):
-				connected_list.append((input_num, rp_device.inputChannelToDescription[input_num]))
+				connected_list.append((input_num, rp_device.input_number_to_description[input_num]))
 			inputs_available = sorted(connected_list, key=operator.itemgetter(1))
 			
 		return inputs_available
