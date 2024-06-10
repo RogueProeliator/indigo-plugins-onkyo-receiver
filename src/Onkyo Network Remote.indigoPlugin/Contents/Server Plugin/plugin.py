@@ -15,7 +15,7 @@ import operator
 
 from RPFramework.RPFrameworkPlugin import RPFrameworkPlugin
 import onkyoNetworkRemoteDevice
-import eISCP
+import eiscp
 # endregion
 
 
@@ -52,8 +52,9 @@ class Plugin(RPFrameworkPlugin):
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def discover_onkyo_devices(self, filter="", valuesDict=None, typeId="", targetId=0):
 		found_receivers = []
-		for receiver in eISCP.eISCP.discover(timeout=1):
-			found_receivers.append((f"{receiver.host}:{receiver.port}", f"{receiver.info['model_name']}:{receiver.host}"))
+		for receiver in eiscp.eISCP.discover(timeout=3):
+			found_receivers.append((f"{receiver.info['identifier']}:{receiver.iscp_port}", f"{receiver.info['model_name']}:{receiver.info['identifier']}"))
+
 		return found_receivers
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -97,12 +98,12 @@ class Plugin(RPFrameworkPlugin):
 			rp_device = onkyoNetworkRemoteDevice.OnkyoReceiverNetworkRemoteDevice(self, None)
 		
 		if filter is None or filter == "" or filter == "all":
-			inputs_available = sorted(rp_device.inputChannelToDescription.iteritems(), key=operator.itemgetter(1))
+			inputs_available = sorted(rp_device.input_number_to_description.iteritems(), key=operator.itemgetter(1))
 		else:
 			# we need to get the list of inputs matching the selected/connected list from the device
 			connected_list = []
 			for input_num in rp_device.indigoDevice.pluginProps.get("deviceInputsConnected"):
-				connected_list.append((input_num, rp_device.inputChannelToDescription[input_num]))
+				connected_list.append((input_num, rp_device.input_number_to_description[input_num]))
 			inputs_available = sorted(connected_list, key=operator.itemgetter(1))
 			
 		return inputs_available
