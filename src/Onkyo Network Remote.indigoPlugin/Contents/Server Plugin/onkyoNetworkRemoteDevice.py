@@ -486,7 +486,7 @@ class OnkyoReceiverNetworkRemoteDevice(RPFrameworkTelnetDevice):
 		self.response_to_mapped_value(r"VPM(?P<value>\d{2})", response_obj, "videoPictureMode", self.video_picturemode_map)
 
 	def listening_mode_response_received(self, response_obj, rp_command):
-		self.response_to_mapped_value(r"LMD(?P<value>([\dA-Z]+)", response_obj, "listeningMode", self.listening_mode_map)
+		self.response_to_mapped_value(r"LMD(?P<value>[\dA-Z]+)", response_obj, "listeningMode", self.listening_mode_map)
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This callback processor performs a standard mapping of a response value to its

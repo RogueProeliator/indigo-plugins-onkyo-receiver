@@ -24,7 +24,7 @@
 	<MenuItem id="deviceCmdsSeparator" type="separator" />
 	<MenuItem id="toggleDebug">
 		<Name>Toggle Debugging On/Off</Name>
-		<CallbackMethod>toggleDebugEnabled</CallbackMethod>
+		<CallbackMethod>toggle_debug_enabled</CallbackMethod>
 	</MenuItem>
 	<MenuItem id="debugDumpDeviceDetails">
 		<Name>Log Device Details</Name>
