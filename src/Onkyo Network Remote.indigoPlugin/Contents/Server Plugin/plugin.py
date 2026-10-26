@@ -12,6 +12,7 @@
 
 # region Python imports
 import operator
+import json
 
 from RPFramework.RPFrameworkPlugin import RPFrameworkPlugin
 import onkyoNetworkRemoteDevice
@@ -40,6 +41,29 @@ class Plugin(RPFrameworkPlugin):
 	# This routine is called in order to determine which state should be shown in the
 	# "State" column on the Indigo devices list
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def send_receiver_command(self, action):
+		"""Report a write failure immediately; never defer a command until reconnect."""
+		try:
+			device = self.managed_devices.get(action.deviceId)
+			if device is None or device.onkyo_receiver is None:
+				raise ConnectionError("Receiver is not running")
+			device.onkyo_receiver.send(str(action.props.get("command", "")))
+			return json.dumps({"ok": True})
+		except (OSError, ValueError) as exc:
+			return json.dumps({"ok": False, "error": str(exc)})
+
+	def query_receiver(self, action):
+		"""Bounded fresh reply over the device's existing connection (JSON result)."""
+		try:
+			device = self.managed_devices.get(action.deviceId)
+			if device is None or device.onkyo_receiver is None:
+				raise ConnectionError("Receiver is not running")
+			value = device.onkyo_receiver.query(str(action.props.get("prefix", "")),
+				float(action.props.get("timeout", 3)))
+			return json.dumps({"ok": True, "value": value})
+		except (OSError, ValueError) as exc:
+			return json.dumps({"ok": False, "error": str(exc)})
+
 	def getDeviceDisplayStateId(self, dev):
 		# this comes from the user's selection, stored in the device properties
 		state_id = dev.pluginProps.get("stateDisplayColumnState", "connectionState")

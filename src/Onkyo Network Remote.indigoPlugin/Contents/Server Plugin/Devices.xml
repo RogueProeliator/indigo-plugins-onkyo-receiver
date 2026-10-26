@@ -27,11 +27,8 @@
 			<Field id="portNumber" type="textfield" defaultValue="60128">
 				<Label>Port:</Label>
 			</Field>
-			<Field id="updateInterval" type="textfield" defaultValue="90">
-				<Label>Status Update Interval (sec):</Label>
-			</Field>
-			<Field id="updateIntervalInstructions" type="label" fontSize="small" alignWithControl="true">
-				<Label>This interval, specified in seconds, determines how often the plugin attempts to read the status of all states of the receiver; this is used to update the plugin whenever a manual change has occurred (such as a change by the physical remote remote or buttons). Setting to 0 will disable status update polling.</Label>
+			<Field id="connectionInstructions" type="label" fontSize="small">
+				<Label>Receiver state changes arrive automatically. The plugin reconnects on connection loss and reads current state once after reconnecting. Use Update Receiver Status for a manual refresh.</Label>
 			</Field>
 			
 			<Field id="devConfigTitle" type="label" fontSize="small">

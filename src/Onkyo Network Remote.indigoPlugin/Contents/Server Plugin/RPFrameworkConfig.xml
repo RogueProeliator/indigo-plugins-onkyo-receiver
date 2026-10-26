@@ -16,14 +16,9 @@
 					</param>
 					<param indigoId="portNumber" paramType="ParamTypeInteger" isRequired="True">
 						<minValue>1</minValue>
-						<maxValue>99999</maxValue>
+						<maxValue>65535</maxValue>
 						<defaultValue>60128</defaultValue>
 						<invalidValueMessage><![CDATA[Please enter a valid port number for the receiver to control]]></invalidValueMessage>
-					</param>
-					<param indigoId="updateInterval" paramType="ParamTypeInteger" isRequired="True">
-						<minValue>0</minValue>
-						<maxValue>99999</maxValue>
-						<invalidValueMessage><![CDATA[Please enter a valid polling time in seconds]]></invalidValueMessage>
 					</param>
 					<param indigoId="deviceZonesConnected" paramType="ParamTypeList" isRequired="True">
 						<minValue>1</minValue>
@@ -47,7 +42,6 @@
 					<telnetConnectionDeviceStateName>connectionState</telnetConnectionDeviceStateName>
 					<telnetConnectionDeviceStateBoolean>isConnected</telnetConnectionDeviceStateBoolean>
 					<updateStatusPollerActionId>updateReceiverStatusFull</updateStatusPollerActionId>
-					<updateStatusPollerIntervalProperty>updateInterval</updateStatusPollerIntervalProperty>
 				</guiConfiguration>
 				<deviceResponses>
 					<response id="devicePowerQuery" respondToActionId="">
@@ -89,11 +83,11 @@
 					
 					<response id="deviceMasterVolumeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[MVL(?P<value>\d{2})]]></matchExpression>
+						<matchExpression><![CDATA[^MVL(?P<value>[0-9A-F]{2})$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>masterVolumeLevel</updateParam>
-								<updateValueFormat><![CDATA[int(re.match("MVL(?P<value>\d{2})", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+								<updateValueFormat><![CDATA[int(re.match("^MVL(?P<value>[0-9A-F]{2})$", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>update_virtual_master_volume</updateParam>
@@ -103,11 +97,11 @@
 					</response>
 					<response id="deviceZoneVolumeQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[ZVL(?P<value>\d{2})]]></matchExpression>
+						<matchExpression><![CDATA[^ZVL(?P<value>[0-9A-F]{2})$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
 								<updateParam>zone2VolumeLevel</updateParam>
-								<updateValueFormat><![CDATA[int(re.match("ZVL(?P<value>\d{2})", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
+								<updateValueFormat><![CDATA[int(re.match("^ZVL(?P<value>[0-9A-F]{2})$", "%cp:response%").groupdict().get("value"),16)]]></updateValueFormat>
 							</effect>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK">
 								<updateParam>update_virtual_zone2_volume</updateParam>
@@ -166,7 +160,7 @@
 					
 					<response id="deviceInputSelectorQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[SLI(?P<value>\d{2})]]></matchExpression>
+						<matchExpression><![CDATA[^SLI(?P<value>[0-9A-F]{2})$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
 								<updateParam>input_selector_query_received</updateParam>
@@ -176,7 +170,7 @@
 					</response>
 					<response id="zone2InputSelectorQuery" respondToActionId="">
 						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
-						<matchExpression><![CDATA[SLZ(?P<value>\d{2})]]></matchExpression>
+						<matchExpression><![CDATA[^SLZ(?P<value>[0-9A-F]{2})$]]></matchExpression>
 						<effects>
 							<effect effectType="RESPONSE_EFFECT_CALLBACK" evalResult="false">
 								<updateParam>zone2_selector_query_received</updateParam>

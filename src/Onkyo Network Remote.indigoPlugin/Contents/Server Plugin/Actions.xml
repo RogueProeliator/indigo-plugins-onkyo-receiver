@@ -1,5 +1,20 @@
 <?xml version="1.0"?>
 <Actions>
+	<Action id="sendReceiverCommand" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Send Receiver Command (immediate)</Name>
+		<ConfigUI>
+			<Field id="command" type="textfield"><Label>eISCP command:</Label></Field>
+		</ConfigUI>
+		<CallbackMethod>send_receiver_command</CallbackMethod>
+	</Action>
+	<Action id="queryReceiver" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
+		<Name>Query Receiver (fresh reply)</Name>
+		<ConfigUI>
+			<Field id="prefix" type="textfield"><Label>Command prefix (e.g. MVL):</Label></Field>
+			<Field id="timeout" type="textfield" defaultValue="3"><Label>Timeout (1–5 seconds):</Label></Field>
+		</ConfigUI>
+		<CallbackMethod>query_receiver</CallbackMethod>
+	</Action>
 	<Action id="setPowerStatus" uiPath="DeviceActions" deviceFilter="self.onkyoReceiverNetworkRemoteDevice">
 		<Name>Set Power Mode</Name>
 		<ConfigUI>
